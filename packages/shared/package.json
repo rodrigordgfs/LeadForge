@@ -2,10 +2,25 @@
   "name": "@leadforge/shared",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "echo \"@leadforge/shared build placeholder\"",
+    "build": "tsc",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "test": "vitest run --passWithNoTests",
-    "dev": "echo \"@leadforge/shared dev placeholder\""
+    "test": "vitest run",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
   }
 }
