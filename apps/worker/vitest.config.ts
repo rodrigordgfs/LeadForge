@@ -5,6 +5,9 @@ import { defineConfig } from "vitest/config";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  esbuild: {
+    jsx: "automatic",
+  },
   resolve: {
     alias: {
       "@leadforge/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
@@ -17,7 +20,7 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
-      include: ["src/**/*.ts"],
+      include: ["src/**/*.ts", "src/**/*.tsx"],
       thresholds: {
         lines: 80,
         statements: 80,
