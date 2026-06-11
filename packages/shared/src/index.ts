@@ -3,6 +3,8 @@ export * from "./audit/types.js";
 export * from "./schemas/search.js";
 export * from "./schemas/env.js";
 export * from "./events/sse.js";
+export * from "./events/redis-client.js";
+export * from "./events/publisher.js";
 export * from "./segments/types.js";
 export * from "./segments/loader.js";
 export * from "./scoring/score-calculator.js";

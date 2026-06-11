@@ -26,6 +26,7 @@ const leadAnalyzedPayloadSchema = z.object({
   score: z.number().int().min(0).max(100),
   scoreBand: z.enum(["critical", "low", "medium", "excellent"]),
   hasRealWebsite: z.boolean(),
+  autoPipelineTriggered: z.boolean(),
 });
 
 const artifactReadyPayloadSchema = z.object({
@@ -71,3 +72,7 @@ export type SseEvent = z.infer<typeof sseEventSchema>;
 
 export const sseChannelName = (searchJobId: string) =>
   `leadforge:search:${searchJobId}:events`;
+
+export function isTerminalSseEvent(type: SseEventType): boolean {
+  return type === "job_completed" || type === "job_failed";
+}
