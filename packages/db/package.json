@@ -2,10 +2,29 @@
   "name": "@leadforge/db",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "echo \"@leadforge/db build placeholder\"",
+    "build": "tsc",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "test": "vitest run --passWithNoTests",
-    "dev": "echo \"@leadforge/db dev placeholder\""
+    "pretest": "prisma generate",
+    "test": "vitest run",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.8.2",
+    "vitest": "^2.1.8"
   }
 }
