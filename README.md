@@ -14,9 +14,9 @@ SaaS platform for intelligent lead capture and digital opportunity analysis for 
 
 ```bash
 pnpm install
-pnpm test:workspace
-pnpm turbo lint
-pnpm turbo test
+pnpm docker:up
+pnpm test
+pnpm lint
 ```
 
 Copy `.env.example` to `.env` and fill in required values before running services.

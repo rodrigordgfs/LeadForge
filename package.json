@@ -9,7 +9,9 @@
     "test": "vitest run --config vitest.config.ts --coverage",
     "test:workspace": "vitest run --config vitest.config.ts --coverage",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
