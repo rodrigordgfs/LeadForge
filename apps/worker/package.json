@@ -2,10 +2,36 @@
   "name": "@leadforge/worker",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "echo \"@leadforge/worker build placeholder\"",
+    "build": "tsc",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "test": "vitest run --passWithNoTests",
-    "dev": "echo \"@leadforge/worker dev placeholder\""
+    "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium",
+    "start": "node dist/index.js",
+    "test": "PLAYWRIGHT_BROWSERS_PATH=0 vitest run",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@leadforge/db": "workspace:*",
+    "@leadforge/queue": "workspace:*",
+    "@leadforge/shared": "workspace:*",
+    "bullmq": "^5.34.8",
+    "openai": "^4.77.0",
+    "playwright": "^1.49.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "linkedom": "^0.18.9",
+    "vitest": "^2.1.8"
   }
 }

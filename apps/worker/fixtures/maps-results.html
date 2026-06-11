@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Google Maps Fixture</title>
+    <style>
+      #results-feed {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+      }
+      [role="article"] {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+      }
+      #detail-panel[hidden] {
+        display: none;
+      }
+      #detail-panel {
+        margin-top: 16px;
+        padding: 12px;
+        border: 1px solid #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="results-feed" role="feed">
+      <div role="article" data-maps-url="https://maps.google.com/?cid=1001">
+        <a data-testid="business-name" href="https://maps.google.com/?cid=1001"
+          >Padaria Central</a
+        >
+        <span data-testid="category">Padaria</span>
+        <span data-testid="address">Rua das Flores, 100</span>
+        <span data-testid="city">São Paulo</span>
+        <span data-testid="state">SP</span>
+        <span data-testid="phone">(11) 3456-7890</span>
+        <a data-testid="website" href="https://padariacentral.com.br">Site</a>
+        <span data-testid="rating">4.5</span>
+        <span data-testid="review-count">87</span>
+        <a data-testid="maps-link" href="https://maps.google.com/?cid=1001"
+          >Ver no Maps</a
+        >
+      </div>
+
+      <div role="article" data-maps-url="https://maps.google.com/?cid=1002">
+        <a data-testid="business-name" href="https://maps.google.com/?cid=1002"
+          >Lanchonete Popular</a
+        >
+        <span data-testid="category">Lanchonete</span>
+        <span data-testid="address">Av. Brasil, 250</span>
+        <span data-testid="city">São Paulo</span>
+        <span data-testid="state">SP</span>
+        <span data-testid="phone">(11) 2345-6789</span>
+        <a data-testid="website" href="https://lanchonetepopular.com.br">Site</a>
+        <span data-testid="rating">3.5</span>
+        <span data-testid="review-count">42</span>
+        <a data-testid="maps-link" href="https://maps.google.com/?cid=1002"
+          >Ver no Maps</a
+        >
+      </div>
+
+      <div
+        role="article"
+        data-maps-url="https://maps.google.com/?cid=1003"
+        data-detail-phone="(11) 98765-4321"
+        data-detail-website="https://clinicasaude.com.br"
+      >
+        <a data-testid="business-name" href="https://maps.google.com/?cid=1003"
+          >Clínica Saúde</a
+        >
+        <span data-testid="category">Clínica Médica</span>
+        <span data-testid="address">Rua Saúde, 50</span>
+        <span data-testid="city">São Paulo</span>
+        <span data-testid="state">SP</span>
+        <span data-testid="phone"></span>
+        <span data-testid="rating">4.8</span>
+        <span data-testid="review-count">156</span>
+        <a data-testid="maps-link" href="https://maps.google.com/?cid=1003"
+          >Ver no Maps</a
+        >
+      </div>
+    </div>
+
+    <div id="detail-panel" data-testid="detail-panel" hidden>
+      <span data-testid="detail-phone"></span>
+      <a data-testid="detail-website" href="#"></a>
+    </div>
+
+    <script>
+      document.querySelectorAll('[role="article"]').forEach((card) => {
+        card.addEventListener("click", () => {
+          const panel = document.querySelector('[data-testid="detail-panel"]');
+          panel.hidden = false;
+          panel.querySelector('[data-testid="detail-phone"]').textContent =
+            card.dataset.detailPhone || "";
+          const websiteLink = panel.querySelector('[data-testid="detail-website"]');
+          websiteLink.href = card.dataset.detailWebsite || "#";
+          websiteLink.textContent = card.dataset.detailWebsite || "";
+        });
+      });
+    </script>
+  </body>
+</html>
