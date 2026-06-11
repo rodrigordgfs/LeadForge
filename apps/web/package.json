@@ -12,6 +12,8 @@
   "dependencies": {
     "@clerk/nextjs": "^6.12.0",
     "@leadforge/db": "workspace:*",
+    "@leadforge/queue": "workspace:*",
+    "@leadforge/shared": "workspace:*",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
