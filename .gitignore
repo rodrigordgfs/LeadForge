@@ -1,5 +1,5 @@
-.agents/*
-.compozy/*
+.agents/
+.compozy/
 node_modules/
 dist/
 .next/
