@@ -75,7 +75,6 @@ describe("monorepo structure", () => {
 
   it("contains per-package tsconfig stubs extending base config", () => {
     const paths = [
-      "apps/web/tsconfig.json",
       "apps/worker/tsconfig.json",
       "packages/db/tsconfig.json",
       "packages/queue/tsconfig.json",
@@ -86,6 +85,11 @@ describe("monorepo structure", () => {
       const tsconfig = JSON.parse(readRootFile(path)) as { extends?: string };
       expect(tsconfig.extends).toContain("tsconfig.base.json");
     }
+
+    const webTsconfig = JSON.parse(readRootFile("apps/web/tsconfig.json")) as {
+      compilerOptions?: { plugins?: Array<{ name: string }> };
+    };
+    expect(webTsconfig.compilerOptions?.plugins?.[0]?.name).toBe("next");
   });
 });
 
