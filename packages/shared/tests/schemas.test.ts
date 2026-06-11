@@ -86,6 +86,7 @@ describe("sse event schema", () => {
         score: 42,
         scoreBand: "low",
         hasRealWebsite: false,
+        autoPipelineTriggered: true,
       },
     });
 
