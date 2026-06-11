@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Score calculator and isHighOpportunity
 type: backend
 complexity: medium
@@ -32,11 +32,11 @@ Implement the digital maturity score calculator (0–100) and high-opportunity d
 
 ## Subtasks
 
-- [ ] 6.1 Implement score band mapper function
-- [ ] 6.2 Implement weighted score calculation from ScoreInput
-- [ ] 6.3 Implement isHighOpportunity with configurable threshold
-- [ ] 6.4 Handle null audit (no website) case with maximum penalty
-- [ ] 6.5 Export score utilities from shared package
+- [x] 6.1 Implement score band mapper function
+- [x] 6.2 Implement weighted score calculation from ScoreInput
+- [x] 6.3 Implement isHighOpportunity with configurable threshold
+- [x] 6.4 Handle null audit (no website) case with maximum penalty
+- [x] 6.5 Export score utilities from shared package
 
 ## Implementation Details
 
@@ -67,15 +67,15 @@ See TechSpec **Core Interfaces** scoring section and ADR-006 weighting. Pure fun
 ## Tests
 
 - Unit tests:
-  - [ ] No website + no audit returns score in 0–40 band
-  - [ ] Social-only URL treated as hasRealWebsite=false yields score ≤ 40
-  - [ ] Full audit with PSI performanceScore=90 returns score in 81–100 band
-  - [ ] isHighOpportunity(55, true) returns true with default threshold 60
-  - [ ] isHighOpportunity(65, true) returns false with default threshold 60
-  - [ ] isHighOpportunity(80, false) returns true regardless of score
-  - [ ] Score band mapper returns "low" for score 45
+  - [x] No website + no audit returns score in 0–40 band
+  - [x] Social-only URL treated as hasRealWebsite=false yields score ≤ 40
+  - [x] Full audit with PSI performanceScore=90 returns score in 81–100 band
+  - [x] isHighOpportunity(55, true) returns true with default threshold 60
+  - [x] isHighOpportunity(65, true) returns false with default threshold 60
+  - [x] isHighOpportunity(80, false) returns true regardless of score
+  - [x] Score band mapper returns "low" for score 45
 - Integration tests:
-  - [ ] End-to-end: fixture SiteAuditResult with PSI data produces expected score within band
+  - [x] End-to-end: fixture SiteAuditResult with PSI data produces expected score within band
 - Test coverage target: >=80%
 - All tests must pass
 

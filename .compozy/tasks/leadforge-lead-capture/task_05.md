@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Segment catalog (20 segments)
 type: backend
 complexity: low
@@ -31,11 +31,11 @@ Extract the 20 industry segments and subcategories from init.md into a versioned
 
 ## Subtasks
 
-- [ ] 5.1 Create `packages/shared/src/segments/segments.json` from init.md content
-- [ ] 5.2 Implement segment loader with ID lookup functions
-- [ ] 5.3 Implement `buildSearchQuery` for scraper input resolution
-- [ ] 5.4 Add validation that catalog contains exactly 20 top-level segments
-- [ ] 5.5 Export segment types and catalog from shared package
+- [x] 5.1 Create `packages/shared/src/segments/segments.json` from init.md content
+- [x] 5.2 Implement segment loader with ID lookup functions
+- [x] 5.3 Implement `buildSearchQuery` for scraper input resolution
+- [x] 5.4 Add validation that catalog contains exactly 20 top-level segments
+- [x] 5.5 Export segment types and catalog from shared package
 
 ## Implementation Details
 
@@ -66,12 +66,12 @@ See init.md Segmentos section and TechSpec **Playwright Maps Scraper Design** st
 ## Tests
 
 - Unit tests:
-  - [ ] Catalog contains exactly 20 segments
-  - [ ] `getSegmentById('saude')` returns segment with Dentista subcategory
-  - [ ] `getSegmentById('invalid')` returns null or throws typed error
-  - [ ] `buildSearchQuery({ subcategoryId: 'dentista', city: 'Pelotas', state: 'RS' })` returns `"Dentista em Pelotas RS"`
+  - [x] Catalog contains exactly 20 segments
+  - [x] `getSegmentById('saude')` returns segment with Dentista subcategory
+  - [x] `getSegmentById('invalid')` returns null or throws typed error
+  - [x] `buildSearchQuery({ subcategoryId: 'dentista', city: 'Pelotas', state: 'RS' })` returns `"Dentista em Pelotas RS"`
 - Integration tests:
-  - [ ] All subcategory IDs referenced in search schema examples exist in catalog
+  - [x] All subcategory IDs referenced in search schema examples exist in catalog
 - Test coverage target: >=80%
 - All tests must pass
 

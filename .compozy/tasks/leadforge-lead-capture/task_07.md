@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: BullMQ queue package
 type: backend
 complexity: medium
@@ -34,12 +34,12 @@ Create `packages/queue` with BullMQ queue definitions, job type enums, payload t
 
 ## Subtasks
 
-- [ ] 7.1 Create Redis connection module with env validation
-- [ ] 7.2 Define queue instances and job name constants
-- [ ] 7.3 Define typed payload interfaces for each queue
-- [ ] 7.4 Export enqueue helpers for web app usage
-- [ ] 7.5 Add queue event types for worker registration
-- [ ] 7.6 Export public API from `@leadforge/queue`
+- [x] 7.1 Create Redis connection module with env validation
+- [x] 7.2 Define queue instances and job name constants
+- [x] 7.3 Define typed payload interfaces for each queue
+- [x] 7.4 Export enqueue helpers for web app usage
+- [x] 7.5 Add queue event types for worker registration
+- [x] 7.6 Export public API from `@leadforge/queue`
 
 ## Implementation Details
 
@@ -73,13 +73,13 @@ See TechSpec **System Architecture** data flow and **Integration Points** Redis 
 ## Tests
 
 - Unit tests:
-  - [ ] SearchJobPayload schema rejects missing searchJobId
-  - [ ] AnalyzeJobPayload requires leadId and userId fields
-  - [ ] Queue factory throws when REDIS_URL is invalid
-  - [ ] Default job options include attempts=3
+  - [x] SearchJobPayload schema rejects missing searchJobId
+  - [x] AnalyzeJobPayload requires leadId and userId fields
+  - [x] Queue factory throws when REDIS_URL is invalid
+  - [x] Default job options include attempts=3
 - Integration tests:
-  - [ ] Enqueue search job to Redis and retrieve job by ID
-  - [ ] Enqueue analyze job after search job without payload corruption
+  - [x] Enqueue search job to Redis and retrieve job by ID
+  - [x] Enqueue analyze job after search job without payload corruption
 - Test coverage target: >=80%
 - All tests must pass
 

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Prisma schema and migrations
 type: backend
 complexity: high
@@ -34,12 +34,12 @@ Implement the full PostgreSQL data model in `packages/db` using Prisma, covering
 
 ## Subtasks
 
-- [ ] 3.1 Create `packages/db/prisma/schema.prisma` with all models and relations
-- [ ] 3.2 Define enums matching PRD CRM statuses and TechSpec job statuses
-- [ ] 3.3 Add indexes on Lead(userId, status), Lead(searchJobId), Artifact(leadId, type)
-- [ ] 3.4 Generate initial migration and verify against Docker postgres
-- [ ] 3.5 Export `prisma` client singleton from `packages/db/src/index.ts`
-- [ ] 3.6 Add Prisma scripts to root turbo pipeline
+- [x] 3.1 Create `packages/db/prisma/schema.prisma` with all models and relations
+- [x] 3.2 Define enums matching PRD CRM statuses and TechSpec job statuses
+- [x] 3.3 Add indexes on Lead(userId, status), Lead(searchJobId), Artifact(leadId, type)
+- [x] 3.4 Generate initial migration and verify against Docker postgres
+- [x] 3.5 Export `prisma` client singleton from `packages/db/src/index.ts`
+- [x] 3.6 Add Prisma scripts to root turbo pipeline
 
 ## Implementation Details
 
@@ -71,14 +71,14 @@ See TechSpec **Data Models** section for field-level schema. User.id uses Clerk 
 ## Tests
 
 - Unit tests:
-  - [ ] Schema defines LeadStatus enum with all 7 PRD CRM values
-  - [ ] Schema defines ArtifactType enum with all 6 artifact types
-  - [ ] Lead model has required indexes in schema metadata
+  - [x] Schema defines LeadStatus enum with all 7 PRD CRM values
+  - [x] Schema defines ArtifactType enum with all 6 artifact types
+  - [x] Lead model has required indexes in schema metadata
 - Integration tests:
-  - [ ] Migration applies cleanly on fresh PostgreSQL
-  - [ ] Create User → SearchJob → Lead → Artifact cascade works
-  - [ ] Delete Lead cascades to Contact, Proposal, Artifact, Prompt records
-  - [ ] Insert Artifact with 5MB base64 boundary rejected or validated at app layer
+  - [x] Migration applies cleanly on fresh PostgreSQL
+  - [x] Create User → SearchJob → Lead → Artifact cascade works
+  - [x] Delete Lead cascades to Contact, Proposal, Artifact, Prompt records
+  - [x] Insert Artifact with 5MB base64 boundary rejected or validated at app layer
 - Test coverage target: >=80%
 - All tests must pass
 

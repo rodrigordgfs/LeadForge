@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Shared types and Zod schemas
 type: backend
 complexity: medium
@@ -31,12 +31,12 @@ Create `packages/shared` with core domain TypeScript types and Zod validation sc
 
 ## Subtasks
 
-- [ ] 4.1 Create scraper types (`ScrapeSearchInput`, `ScrapedBusiness`, `MapsScraper`)
-- [ ] 4.2 Create audit types (`SiteAuditResult`, `SiteAuditor`, `SocialSignals`)
-- [ ] 4.3 Create Zod schemas for search API request/response bodies
-- [ ] 4.4 Create env validation schema with safe parse helper
-- [ ] 4.5 Define SSE event type union and payload schemas
-- [ ] 4.6 Export public API from `packages/shared/src/index.ts`
+- [x] 4.1 Create scraper types (`ScrapeSearchInput`, `ScrapedBusiness`, `MapsScraper`)
+- [x] 4.2 Create audit types (`SiteAuditResult`, `SiteAuditor`, `SocialSignals`)
+- [x] 4.3 Create Zod schemas for search API request/response bodies
+- [x] 4.4 Create env validation schema with safe parse helper
+- [x] 4.5 Define SSE event type union and payload schemas
+- [x] 4.6 Export public API from `packages/shared/src/index.ts`
 
 ## Implementation Details
 
@@ -69,13 +69,13 @@ See TechSpec **Core Interfaces** and **API Endpoints** sections for type contrac
 ## Tests
 
 - Unit tests:
-  - [ ] CreateSearchSchema rejects radiusKm=0 with descriptive Zod error
-  - [ ] CreateSearchSchema rejects invalid UF code "XX"
-  - [ ] CreateSearchSchema accepts valid payload with optional filters
-  - [ ] EnvSchema fails when OPENAI_API_KEY missing in production mode
-  - [ ] SSE event schema validates `lead_analyzed` payload shape
+  - [x] CreateSearchSchema rejects radiusKm=0 with descriptive Zod error
+  - [x] CreateSearchSchema rejects invalid UF code "XX"
+  - [x] CreateSearchSchema accepts valid payload with optional filters
+  - [x] EnvSchema fails when OPENAI_API_KEY missing in production mode
+  - [x] SSE event schema validates `lead_analyzed` payload shape
 - Integration tests:
-  - [ ] ScrapedBusiness type serializes to JSON and parses back without data loss
+  - [x] ScrapedBusiness type serializes to JSON and parses back without data loss
 - Test coverage target: >=80%
 - All tests must pass
 

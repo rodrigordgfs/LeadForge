@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Docker Compose PostgreSQL + Redis
 type: infra
 complexity: low
@@ -31,11 +31,11 @@ Provide local development infrastructure with PostgreSQL and Redis via Docker Co
 
 ## Subtasks
 
-- [ ] 2.1 Create `docker-compose.yml` with postgres and redis services
-- [ ] 2.2 Add healthcheck definitions for both services
-- [ ] 2.3 Configure default credentials suitable for local development only
-- [ ] 2.4 Update `.env.example` with compose-aligned connection strings
-- [ ] 2.5 Verify services start and accept connections
+- [x] 2.1 Create `docker-compose.yml` with postgres and redis services
+- [x] 2.2 Add healthcheck definitions for both services
+- [x] 2.3 Configure default credentials suitable for local development only
+- [x] 2.4 Update `.env.example` with compose-aligned connection strings
+- [x] 2.5 Verify services start and accept connections
 
 ## Implementation Details
 

@@ -5,13 +5,13 @@
 | # | Title | Status | Complexity | Dependencies |
 |---|-------|--------|------------|--------------|
 | 01 | Monorepo scaffold | completed | medium | — |
-| 02 | Docker Compose PostgreSQL + Redis | pending | low | task_01 |
-| 03 | Prisma schema and migrations | pending | high | task_01, task_02 |
-| 04 | Shared types and Zod schemas | pending | medium | task_03 |
-| 05 | Segment catalog (20 segments) | pending | low | task_04 |
-| 06 | Score calculator and isHighOpportunity | pending | medium | task_04 |
-| 07 | BullMQ queue package | pending | medium | task_01, task_02, task_04 |
-| 08 | Next.js shell and Clerk auth | pending | medium | task_01, task_03 |
+| 02 | Docker Compose PostgreSQL + Redis | completed | low | task_01 |
+| 03 | Prisma schema and migrations | completed | high | task_01, task_02 |
+| 04 | Shared types and Zod schemas | completed | medium | task_03 |
+| 05 | Segment catalog (20 segments) | completed | low | task_04 |
+| 06 | Score calculator and isHighOpportunity | completed | medium | task_04 |
+| 07 | BullMQ queue package | completed | medium | task_01, task_02, task_04 |
+| 08 | Next.js shell and Clerk auth | completed | medium | task_01, task_03 |
 | 09 | Search jobs REST API | pending | medium | task_07, task_08 |
 | 10 | SSE job events endpoint | pending | medium | task_07, task_09 |
 | 11 | Maps scraper Playwright module | pending | high | task_04, task_05, task_07 |

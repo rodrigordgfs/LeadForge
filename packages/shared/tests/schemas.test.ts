@@ -63,7 +63,7 @@ describe("createSearchSchema", () => {
 describe("env schema", () => {
   it("fails when OPENAI_API_KEY missing in production mode", () => {
     const result = parseEnv({
-      DATABASE_URL: "postgresql://leadforge:leadforge@localhost:5432/leadforge",
+      DATABASE_URL: "postgresql://leadforge:leadforge@localhost:5434/leadforge",
       REDIS_URL: "redis://localhost:6379",
       NODE_ENV: "production",
     });

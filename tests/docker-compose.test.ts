@@ -15,8 +15,8 @@ describe("docker-compose.yml", () => {
     volumes: Record<string, unknown>;
   };
 
-  it("defines postgres service on port 5432", () => {
-    expect(compose.services.postgres?.ports).toContain("5432:5432");
+  it("defines postgres service on host port 5434", () => {
+    expect(compose.services.postgres?.ports).toContain("5434:5432");
   });
 
   it("defines redis service on port 6379", () => {
@@ -37,7 +37,7 @@ describe("docker-compose.yml", () => {
 describe(".env.example connection strings", () => {
   it("aligns DATABASE_URL and REDIS_URL with docker-compose defaults", () => {
     const envExample = readRootFile(".env.example");
-    expect(envExample).toContain("postgresql://leadforge:leadforge@localhost:5432/leadforge");
+    expect(envExample).toContain("postgresql://leadforge:leadforge@localhost:5434/leadforge");
     expect(envExample).toContain("redis://localhost:6379");
   });
 });

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Next.js shell and Clerk auth
 type: backend
 complexity: medium
@@ -33,12 +33,12 @@ Bootstrap `apps/web` as a Next.js 15 App Router application with Clerk authentic
 
 ## Subtasks
 
-- [ ] 8.1 Initialize Next.js app with App Router and Tailwind CSS
-- [ ] 8.2 Configure Clerk provider and middleware
-- [ ] 8.3 Implement User upsert on first authenticated request or webhook
-- [ ] 8.4 Create protected `(app)` layout shell with navigation placeholders
-- [ ] 8.5 Add `GET /api/health` unauthenticated endpoint
-- [ ] 8.6 Add sign-in and sign-up pages via Clerk components
+- [x] 8.1 Initialize Next.js app with App Router and Tailwind CSS
+- [x] 8.2 Configure Clerk provider and middleware
+- [x] 8.3 Implement User upsert on first authenticated request or webhook
+- [x] 8.4 Create protected `(app)` layout shell with navigation placeholders
+- [x] 8.5 Add `GET /api/health` unauthenticated endpoint
+- [x] 8.6 Add sign-in and sign-up pages via Clerk components
 
 ## Implementation Details
 
@@ -73,13 +73,13 @@ See TechSpec **API Endpoints** auth requirements and **Integration Points** Cler
 ## Tests
 
 - Unit tests:
-  - [ ] Middleware allows `/api/health` without authentication
-  - [ ] Middleware blocks `/api/searches` without session
-  - [ ] user-sync creates User with default settingsJson threshold 60
-  - [ ] user-sync updates name/email on subsequent login without duplicating
+  - [x] Middleware allows `/api/health` without authentication
+  - [x] Middleware blocks `/api/searches` without session
+  - [x] user-sync creates User with default settingsJson threshold 60
+  - [x] user-sync updates name/email on subsequent login without duplicating
 - Integration tests:
-  - [ ] GET /api/health returns 200 `{ status: 'ok' }`
-  - [ ] Authenticated mock session upserts User row in test database
+  - [x] GET /api/health returns 200 `{ status: 'ok' }`
+  - [x] Authenticated mock session upserts User row in test database
 - Test coverage target: >=80%
 - All tests must pass
 
