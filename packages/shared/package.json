@@ -1,0 +1,11 @@
+{
+  "name": "@leadforge/shared",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"@leadforge/shared build placeholder\"",
+    "lint": "eslint . --no-error-on-unmatched-pattern",
+    "test": "vitest run --passWithNoTests",
+    "dev": "echo \"@leadforge/shared dev placeholder\""
+  }
+}

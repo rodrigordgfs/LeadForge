@@ -1,0 +1,11 @@
+{
+  "name": "@leadforge/queue",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"@leadforge/queue build placeholder\"",
+    "lint": "eslint . --no-error-on-unmatched-pattern",
+    "test": "vitest run --passWithNoTests",
+    "dev": "echo \"@leadforge/queue dev placeholder\""
+  }
+}

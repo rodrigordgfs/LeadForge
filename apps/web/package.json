@@ -1,0 +1,11 @@
+{
+  "name": "@leadforge/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo \"@leadforge/web build placeholder\"",
+    "lint": "eslint . --no-error-on-unmatched-pattern",
+    "test": "vitest run --passWithNoTests",
+    "dev": "echo \"@leadforge/web dev placeholder\""
+  }
+}
