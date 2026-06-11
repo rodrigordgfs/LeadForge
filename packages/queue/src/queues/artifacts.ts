@@ -20,12 +20,15 @@ export function getArtifactsQueue(): Queue<ArtifactsJobPayload> {
   return artifactsQueue;
 }
 
+export const ARTIFACTS_JOB_TIMEOUT_MS = 5 * 60 * 1000;
+
 export async function enqueueArtifactsJob(
   payload: ArtifactsJobPayload,
   jobId?: string,
 ): Promise<string> {
   const job = await getArtifactsQueue().add(JOB_NAMES.artifacts, payload, {
     jobId,
+    timeout: ARTIFACTS_JOB_TIMEOUT_MS,
   });
   return job.id ?? jobId ?? "";
 }

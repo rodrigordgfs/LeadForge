@@ -5,6 +5,10 @@ import {
   QUEUE_NAMES,
 } from "@leadforge/queue";
 import { PlaywrightMapsScraper } from "./scraper/maps-scraper.js";
+import {
+  ARTIFACTS_JOB_TIMEOUT_MS,
+  createArtifactsProcessorHandler,
+} from "./processors/artifacts-processor.js";
 import { createAnalyzeProcessorHandler } from "./processors/analyze-processor.js";
 import { createSearchProcessorHandler } from "./processors/search-processor.js";
 
@@ -84,10 +88,34 @@ export {
   analysisTxtResponseSchema,
 } from "./artifacts/types.js";
 export type { LeadPromptContext } from "./artifacts/types.js";
+export {
+  encodeBase64,
+  decodeBase64,
+  upsertArtifact,
+  upsertProposal,
+  storeAllArtifacts,
+  ARTIFACT_FILE_META,
+  ARTIFACT_TYPE,
+  MAX_ARTIFACT_SIZE_BYTES,
+  ArtifactTooLargeError,
+} from "./artifacts/artifact-storage.js";
+export type { StoredArtifactResult } from "./artifacts/artifact-storage.js";
+export {
+  renderProposalPdf,
+  renderDiagnosisPdf,
+  renderWireframePdf,
+} from "./artifacts/pdf-renderer.js";
+export {
+  processArtifactsJob,
+  createArtifactsProcessorHandler,
+  ARTIFACTS_JOB_TIMEOUT_MS,
+} from "./processors/artifacts-processor.js";
+export type { ArtifactsProcessorDeps } from "./processors/artifacts-processor.js";
 
 export interface WorkerHandles {
   searchWorker: Worker;
   analyzeWorker: Worker;
+  artifactsWorker: Worker;
 }
 
 export function createWorkers(): WorkerHandles {
@@ -106,7 +134,16 @@ export function createWorkers(): WorkerHandles {
     { connection },
   );
 
-  return { searchWorker, analyzeWorker };
+  const artifactsWorker = new Worker(
+    QUEUE_NAMES.artifacts,
+    createArtifactsProcessorHandler(),
+    {
+      connection,
+      lockDuration: ARTIFACTS_JOB_TIMEOUT_MS,
+    },
+  );
+
+  return { searchWorker, analyzeWorker, artifactsWorker };
 }
 
 export async function startWorkers(): Promise<WorkerHandles> {
@@ -115,6 +152,7 @@ export async function startWorkers(): Promise<WorkerHandles> {
   const shutdown = async () => {
     await workers.searchWorker.close();
     await workers.analyzeWorker.close();
+    await workers.artifactsWorker.close();
     process.exit(0);
   };
 
