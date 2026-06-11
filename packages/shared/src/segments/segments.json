@@ -1,0 +1,179 @@
+{
+  "version": "1.0.0",
+  "segments": [
+    {
+      "id": "automotivo",
+      "name": "Automotivo",
+      "subcategories": [
+        { "id": "oficina-mecanica", "name": "Oficina Mecânica" },
+        { "id": "auto-center", "name": "Auto Center" },
+        { "id": "borracharia", "name": "Borracharia" },
+        { "id": "lava-rapido", "name": "Lava Rápido" },
+        { "id": "guincho", "name": "Guincho" },
+        { "id": "auto-eletrica", "name": "Auto Elétrica" }
+      ]
+    },
+    {
+      "id": "alimentacao",
+      "name": "Alimentação",
+      "subcategories": [
+        { "id": "restaurante", "name": "Restaurante" },
+        { "id": "pizzaria", "name": "Pizzaria" },
+        { "id": "hamburgueria", "name": "Hamburgueria" },
+        { "id": "cafeteria", "name": "Cafeteria" },
+        { "id": "padaria", "name": "Padaria" }
+      ]
+    },
+    {
+      "id": "saude",
+      "name": "Saúde",
+      "subcategories": [
+        { "id": "clinica-medica", "name": "Clínica Médica" },
+        { "id": "dentista", "name": "Dentista" },
+        { "id": "psicologo", "name": "Psicólogo" },
+        { "id": "nutricionista", "name": "Nutricionista" }
+      ]
+    },
+    {
+      "id": "beleza",
+      "name": "Beleza",
+      "subcategories": [
+        { "id": "salao-de-beleza", "name": "Salão de Beleza" },
+        { "id": "barbearia", "name": "Barbearia" },
+        { "id": "clinica-estetica", "name": "Clínica Estética" }
+      ]
+    },
+    {
+      "id": "construcao",
+      "name": "Construção",
+      "subcategories": [
+        { "id": "construtora", "name": "Construtora" },
+        { "id": "marcenaria", "name": "Marcenaria" },
+        { "id": "vidracaria", "name": "Vidraçaria" },
+        { "id": "serralheria", "name": "Serralheria" },
+        { "id": "eletricista", "name": "Eletricista" }
+      ]
+    },
+    {
+      "id": "servicos",
+      "name": "Serviços",
+      "subcategories": [
+        { "id": "contabilidade", "name": "Contabilidade" },
+        { "id": "consultoria", "name": "Consultoria" },
+        { "id": "marketing-digital", "name": "Marketing Digital" },
+        { "id": "grafica", "name": "Gráfica" }
+      ]
+    },
+    {
+      "id": "juridico",
+      "name": "Jurídico",
+      "subcategories": [
+        { "id": "advogado", "name": "Advogado" },
+        { "id": "escritorio-de-advocacia", "name": "Escritório de Advocacia" }
+      ]
+    },
+    {
+      "id": "fitness",
+      "name": "Fitness",
+      "subcategories": [
+        { "id": "academia", "name": "Academia" },
+        { "id": "crossfit", "name": "Crossfit" },
+        { "id": "pilates", "name": "Pilates" }
+      ]
+    },
+    {
+      "id": "pet",
+      "name": "Pet",
+      "subcategories": [
+        { "id": "pet-shop", "name": "Pet Shop" },
+        { "id": "clinica-veterinaria", "name": "Clínica Veterinária" }
+      ]
+    },
+    {
+      "id": "imobiliario",
+      "name": "Imobiliário",
+      "subcategories": [
+        { "id": "imobiliaria", "name": "Imobiliária" },
+        { "id": "corretor", "name": "Corretor" }
+      ]
+    },
+    {
+      "id": "educacao",
+      "name": "Educação",
+      "subcategories": [
+        { "id": "escolas", "name": "Escolas" },
+        { "id": "cursos", "name": "Cursos" },
+        { "id": "idiomas", "name": "Idiomas" }
+      ]
+    },
+    {
+      "id": "turismo",
+      "name": "Turismo",
+      "subcategories": [
+        { "id": "hotel", "name": "Hotel" },
+        { "id": "pousada", "name": "Pousada" }
+      ]
+    },
+    {
+      "id": "comercio",
+      "name": "Comércio",
+      "subcategories": [
+        { "id": "roupas", "name": "Roupas" },
+        { "id": "calcados", "name": "Calçados" },
+        { "id": "papelaria", "name": "Papelaria" },
+        { "id": "otica", "name": "Ótica" }
+      ]
+    },
+    {
+      "id": "tecnologia",
+      "name": "Tecnologia",
+      "subcategories": [
+        { "id": "software-house", "name": "Software House" },
+        { "id": "empresa-de-ti", "name": "Empresa de TI" }
+      ]
+    },
+    {
+      "id": "logistica",
+      "name": "Logística",
+      "subcategories": [
+        { "id": "transportadora", "name": "Transportadora" },
+        { "id": "fretes", "name": "Fretes" }
+      ]
+    },
+    {
+      "id": "eventos",
+      "name": "Eventos",
+      "subcategories": [
+        { "id": "fotografo", "name": "Fotógrafo" },
+        { "id": "dj", "name": "DJ" },
+        { "id": "casa-de-festas", "name": "Casa de Festas" }
+      ]
+    },
+    {
+      "id": "industria",
+      "name": "Indústria",
+      "subcategories": [
+        { "id": "metalurgica", "name": "Metalúrgica" },
+        { "id": "alimenticia", "name": "Alimentícia" },
+        { "id": "textil", "name": "Têxtil" }
+      ]
+    },
+    {
+      "id": "agronegocio",
+      "name": "Agronegócio",
+      "subcategories": [
+        { "id": "agropecuaria", "name": "Agropecuária" },
+        { "id": "cooperativas", "name": "Cooperativas" }
+      ]
+    },
+    {
+      "id": "financeiro",
+      "name": "Financeiro",
+      "subcategories": [
+        { "id": "seguros", "name": "Seguros" },
+        { "id": "consorcios", "name": "Consórcios" },
+        { "id": "investimentos", "name": "Investimentos" }
+      ]
+    }
+  ]
+}
