@@ -1,5 +1,8 @@
 import { renderToBuffer, type DocumentProps } from "@react-pdf/renderer";
 import { createElement, type ReactElement } from "react";
+import { registerGeistFonts } from "./pdf/fonts.js";
+
+registerGeistFonts();
 import type {
   DiagnosisResponse,
   ProposalResponse,

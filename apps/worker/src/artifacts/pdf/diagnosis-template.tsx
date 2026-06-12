@@ -1,33 +1,6 @@
-import {
-  Document,
-  Page,
-  StyleSheet,
-  Text,
-  View,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View } from "@react-pdf/renderer";
 import type { DiagnosisResponse } from "../types.js";
-
-const styles = StyleSheet.create({
-  page: {
-    padding: 40,
-    fontSize: 11,
-    fontFamily: "Helvetica",
-    lineHeight: 1.6,
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 8,
-    fontFamily: "Helvetica-Bold",
-  },
-  subtitle: {
-    fontSize: 12,
-    marginBottom: 24,
-    color: "#444444",
-  },
-  narrative: {
-    textAlign: "justify",
-  },
-});
+import { pdfStyles } from "./styles.js";
 
 export interface DiagnosisTemplateProps {
   leadName: string;
@@ -40,12 +13,12 @@ export function DiagnosisTemplate({
 }: DiagnosisTemplateProps) {
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>Diagnóstico Digital</Text>
-        <Text style={styles.subtitle}>{leadName}</Text>
+      <Page size="A4" style={pdfStyles.page}>
+        <Text style={pdfStyles.title}>Diagnóstico Digital</Text>
+        <Text style={pdfStyles.subtitle}>{leadName}</Text>
 
         <View>
-          <Text style={styles.narrative}>{diagnosis.narrative}</Text>
+          <Text style={pdfStyles.narrative}>{diagnosis.narrative}</Text>
         </View>
       </Page>
     </Document>
