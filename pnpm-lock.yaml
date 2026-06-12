@@ -121,7 +121,7 @@ importers:
         specifier: ^4.77.0
         version: 4.104.0(ws@8.21.0)(zod@3.25.76)
       playwright:
-        specifier: ^1.49.0
+        specifier: ^1.60.0
         version: 1.60.0
       react:
         specifier: ^19.0.0
@@ -187,6 +187,25 @@ importers:
         specifier: ^3.24.1
         version: 3.25.76
     devDependencies:
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.21)(jsdom@25.0.1)
+
+  packages/ui:
+    dependencies:
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.17
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.19.21)(jsdom@25.0.1)
