@@ -1,3 +1,8 @@
-export { geistTokens } from "./tokens/geist-tokens.js";
-export type { GeistTokens } from "./tokens/geist-tokens.js";
+export { geistTokens, pdfTokens } from "./tokens/geist-tokens.js";
+export type {
+  GeistColorTokens,
+  GeistRadiusTokens,
+  GeistSpacingKey,
+  GeistTokens,
+} from "./tokens/geist-tokens.js";
 export { cn } from "./lib/utils.js";
