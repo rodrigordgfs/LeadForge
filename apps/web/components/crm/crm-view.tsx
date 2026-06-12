@@ -10,9 +10,13 @@ import {
 import { LEAD_STATUS_ORDER } from "@/lib/constants/labels";
 
 function emptyGrouped(): Record<LeadStatus, KanbanLead[]> {
-  return Object.fromEntries(
-    LEAD_STATUS_ORDER.map((status) => [status, []]),
-  ) as Record<LeadStatus, KanbanLead[]>;
+  return LEAD_STATUS_ORDER.reduce(
+    (acc, status) => {
+      acc[status] = [];
+      return acc;
+    },
+    {} as Record<LeadStatus, KanbanLead[]>,
+  );
 }
 
 export function CrmView() {

@@ -1,10 +1,9 @@
-import type Redis from "ioredis";
+import type { Redis } from "ioredis";
 
 import { createRedisClient } from "./redis-client.js";
 import {
-  isTerminalSseEvent,
+  serializeSseEvent,
   sseChannelName,
-  sseEventSchema,
   type SseEvent,
 } from "./sse.js";
 
@@ -28,16 +27,6 @@ export function resetSsePublisherClient(): void {
     publisherClient = undefined;
   }
 }
-
-export function serializeSseEvent(event: SseEvent): string {
-  return JSON.stringify(sseEventSchema.parse(event));
-}
-
-export function formatSseMessage(event: SseEvent): string {
-  return `event: ${event.type}\ndata: ${serializeSseEvent(event)}\n\n`;
-}
-
-export { isTerminalSseEvent };
 
 export async function publishSseEvent(
   searchJobId: string,

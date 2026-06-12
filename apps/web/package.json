@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "dotenv -e ../../.env -- next build",
+    "dev": "dotenv -e ../../.env -- next dev",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "start": "next start",
+    "start": "dotenv -e ../../.env -- next start",
     "test": "vitest run"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^8.0.0",
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",

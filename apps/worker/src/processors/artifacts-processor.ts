@@ -1,6 +1,6 @@
 import { prisma } from "@leadforge/db";
 import type { ArtifactsJobPayload } from "@leadforge/queue";
-import { publishSseEvent } from "@leadforge/shared";
+import { publishSseEvent } from "@leadforge/shared/publisher";
 import type { Job } from "bullmq";
 import { storeAllArtifacts } from "../artifacts/artifact-storage.js";
 import { TextArtifactGenerator } from "../artifacts/text-generator.js";

@@ -1,3 +1,4 @@
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Worker } from "bullmq";
 import {
@@ -149,10 +150,50 @@ export function createWorkers(): WorkerHandles {
 export async function startWorkers(): Promise<WorkerHandles> {
   const workers = createWorkers();
 
+  const logJobEvent =
+    (queue: string) =>
+    (jobId: string | undefined, event: string, detail?: string) => {
+      const suffix = detail ? ` — ${detail}` : "";
+      console.log(`[${queue}] ${event} job=${jobId ?? "unknown"}${suffix}`);
+    };
+
+  for (const [name, worker] of [
+    ["search", workers.searchWorker],
+    ["analyze", workers.analyzeWorker],
+    ["artifacts", workers.artifactsWorker],
+  ] as const) {
+    const log = logJobEvent(name);
+
+    worker.on("ready", () => {
+      console.log(`[${name}] worker ready, listening on queue "${name}"`);
+    });
+
+    worker.on("active", (job) => {
+      log(job.id, "active");
+    });
+
+    worker.on("completed", (job) => {
+      log(job.id, "completed");
+    });
+
+    worker.on("failed", (job, error) => {
+      log(job?.id, "failed", error.message);
+    });
+
+    worker.on("error", (error) => {
+      console.error(`[${name}] worker error:`, error.message);
+    });
+  }
+
+  console.log("LeadForge workers starting (search, analyze, artifacts)…");
+  console.log("Press Ctrl+C to stop.");
+
   const shutdown = async () => {
+    console.log("\nShutting down workers…");
     await workers.searchWorker.close();
     await workers.analyzeWorker.close();
     await workers.artifactsWorker.close();
+    console.log("Workers stopped.");
     process.exit(0);
   };
 
@@ -164,7 +205,8 @@ export async function startWorkers(): Promise<WorkerHandles> {
 
 const isMainModule =
   process.argv[1] !== undefined &&
-  fileURLToPath(import.meta.url) === fileURLToPath(process.argv[1]);
+  path.resolve(fileURLToPath(import.meta.url)) ===
+    path.resolve(process.argv[1]);
 
 if (isMainModule) {
   startWorkers().catch((error) => {

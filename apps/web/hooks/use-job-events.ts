@@ -44,6 +44,58 @@ const initialState: JobEventsState = {
   status: "idle",
 };
 
+function derivePhaseFromJob(status: string, progressPct: number): string {
+  if (status === "completed") {
+    return "completed";
+  }
+  if (status === "failed") {
+    return "failed";
+  }
+  if (status === "pending") {
+    return "pending";
+  }
+  if (progressPct >= 80) {
+    return "analyzing";
+  }
+  if (progressPct > 0) {
+    return "scraping";
+  }
+  return "running";
+}
+
+function stateFromSearchJob(job: {
+  status: string;
+  progressPct: number;
+  totalFound: number;
+  errorMessage?: string | null;
+}): JobEventsState {
+  if (job.status === "completed") {
+    return {
+      progressPct: 100,
+      totalFound: job.totalFound,
+      phase: "completed",
+      status: "completed",
+    };
+  }
+
+  if (job.status === "failed") {
+    return {
+      progressPct: job.progressPct,
+      totalFound: job.totalFound,
+      phase: "failed",
+      status: "failed",
+      errorMessage: job.errorMessage ?? "A busca falhou",
+    };
+  }
+
+  return {
+    progressPct: job.progressPct,
+    totalFound: job.totalFound,
+    phase: derivePhaseFromJob(job.status, job.progressPct),
+    status: job.status === "pending" ? "connecting" : "active",
+  };
+}
+
 function derivePhase(event: SseEvent): string {
   switch (event.type) {
     case "progress":
@@ -140,14 +192,6 @@ export function useJobEvents(
     if (event.type === "artifact_ready") {
       callbacksRef.current.onArtifactReady?.(event);
     }
-
-    if (event.type === "job_completed") {
-      callbacksRef.current.onComplete?.(event);
-    }
-
-    if (event.type === "job_failed") {
-      callbacksRef.current.onFailed?.(event);
-    }
   }, []);
 
   useEffect(() => {
@@ -155,11 +199,96 @@ export function useJobEvents(
       return;
     }
 
+    let cancelled = false;
+    let terminalNotified = false;
+    let pollTimer: ReturnType<typeof setInterval> | undefined;
+
+    const stopPolling = () => {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = undefined;
+      }
+    };
+
+    const notifyTerminal = (next: JobEventsState) => {
+      if (terminalNotified) {
+        return;
+      }
+
+      if (next.status === "completed") {
+        terminalNotified = true;
+        stopPolling();
+        callbacksRef.current.onComplete?.({
+          type: "job_completed",
+          payload: {
+            searchJobId,
+            totalFound: next.totalFound,
+          },
+        });
+      }
+
+      if (next.status === "failed") {
+        terminalNotified = true;
+        stopPolling();
+        callbacksRef.current.onFailed?.({
+          type: "job_failed",
+          payload: {
+            searchJobId,
+            errorMessage: next.errorMessage ?? "A busca falhou",
+          },
+        });
+      }
+    };
+
+    const syncFromApi = async () => {
+      try {
+        const response = await fetch(`/api/searches/${searchJobId}`);
+        if (!response.ok || cancelled) {
+          return;
+        }
+
+        const job = (await response.json()) as {
+          status: string;
+          progressPct: number;
+          totalFound: number;
+          errorMessage?: string | null;
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        setState((prev) => {
+          if (
+            prev.status === "completed" ||
+            prev.status === "failed" ||
+            isTerminalSseEvent(prev.lastEvent?.type ?? "progress")
+          ) {
+            return prev;
+          }
+
+          const next = stateFromSearchJob(job);
+          if (next.status === "completed" || next.status === "failed") {
+            notifyTerminal(next);
+          }
+          return next;
+        });
+      } catch {
+        // Polling/sync errors are non-fatal; SSE may still deliver events.
+      }
+    };
+
     setState((prev) => ({
       ...prev,
       status: "connecting",
       phase: "pending",
     }));
+
+    void syncFromApi();
+
+    pollTimer = setInterval(() => {
+      void syncFromApi();
+    }, 2000);
 
     const source = new EventSource(`/api/jobs/${searchJobId}/events`);
 
@@ -167,6 +296,25 @@ export function useJobEvents(
       try {
         const parsed = sseEventSchema.parse(JSON.parse(messageEvent.data));
         handleEvent(parsed);
+
+        if (parsed.type === "job_completed") {
+          notifyTerminal({
+            progressPct: 100,
+            totalFound: parsed.payload.totalFound,
+            phase: "completed",
+            status: "completed",
+          });
+        }
+
+        if (parsed.type === "job_failed") {
+          notifyTerminal({
+            progressPct: 0,
+            totalFound: 0,
+            phase: "failed",
+            status: "failed",
+            errorMessage: parsed.payload.errorMessage,
+          });
+        }
       } catch {
         // Ignore malformed SSE payloads.
       }
@@ -180,26 +328,24 @@ export function useJobEvents(
     source.addEventListener("job_failed", onMessage);
 
     source.onopen = () => {
-      setState((prev) => ({ ...prev, status: "active" }));
+      setState((prev) => {
+        if (prev.status === "completed" || prev.status === "failed") {
+          return prev;
+        }
+        return { ...prev, status: "active" };
+      });
     };
 
     source.onerror = () => {
-      setState((prev) => {
-        if (isTerminalSseEvent(prev.lastEvent?.type ?? "progress")) {
-          return prev;
-        }
-
-        return {
-          ...prev,
-          status: "failed",
-          phase: "failed",
-          errorMessage: "Conexão com o servidor perdida",
-        };
-      });
-      source.close();
+      if (terminalNotified) {
+        return;
+      }
+      void syncFromApi();
     };
 
     return () => {
+      cancelled = true;
+      stopPolling();
       source.close();
     };
   }, [searchJobId, enabled, handleEvent]);

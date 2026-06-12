@@ -28,7 +28,6 @@ export async function enqueueArtifactsJob(
 ): Promise<string> {
   const job = await getArtifactsQueue().add(JOB_NAMES.artifacts, payload, {
     jobId,
-    timeout: ARTIFACTS_JOB_TIMEOUT_MS,
   });
   return job.id ?? jobId ?? "";
 }

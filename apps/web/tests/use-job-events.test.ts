@@ -43,9 +43,26 @@ describe("useJobEvents", () => {
   afterEach(() => {
     MockEventSource.instances = [];
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
+  function mockSearchApi(job: {
+    status: string;
+    progressPct: number;
+    totalFound: number;
+    errorMessage?: string | null;
+  }) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => job,
+      }),
+    );
+  }
+
   it("updates progressPct on progress SSE event", async () => {
+    mockSearchApi({ status: "running", progressPct: 0, totalFound: 0 });
     vi.stubGlobal("EventSource", MockEventSource as unknown as typeof EventSource);
 
     const { result } = renderHook(() => useJobEvents("job_1"));
@@ -70,6 +87,7 @@ describe("useJobEvents", () => {
   });
 
   it("calls onComplete callback on job_completed event", async () => {
+    mockSearchApi({ status: "running", progressPct: 50, totalFound: 2 });
     vi.stubGlobal("EventSource", MockEventSource as unknown as typeof EventSource);
 
     const onComplete = vi.fn();
@@ -98,6 +116,7 @@ describe("useJobEvents", () => {
   });
 
   it("progress bar reaches 100% when job_completed event received", async () => {
+    mockSearchApi({ status: "running", progressPct: 90, totalFound: 4 });
     vi.stubGlobal("EventSource", MockEventSource as unknown as typeof EventSource);
 
     const { result } = renderHook(() => useJobEvents("job_1"));
@@ -116,6 +135,27 @@ describe("useJobEvents", () => {
     await waitFor(() => {
       expect(result.current.progressPct).toBe(100);
       expect(result.current.status).toBe("completed");
+    });
+  });
+
+  it("syncs completed state from API when SSE events were missed", async () => {
+    mockSearchApi({ status: "completed", progressPct: 100, totalFound: 0 });
+    vi.stubGlobal("EventSource", MockEventSource as unknown as typeof EventSource);
+
+    const onComplete = vi.fn();
+    const { result } = renderHook(() =>
+      useJobEvents("job_1", {
+        onComplete,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.status).toBe("completed");
+      expect(result.current.progressPct).toBe(100);
+      expect(onComplete).toHaveBeenCalledWith({
+        type: "job_completed",
+        payload: { searchJobId: "job_1", totalFound: 0 },
+      });
     });
   });
 });

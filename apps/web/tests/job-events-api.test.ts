@@ -24,10 +24,12 @@ vi.mock("@/lib/jobs/create-job-events-stream", () => ({
 import { GET as getJobEvents } from "@/app/api/jobs/[id]/events/route";
 import {
   formatSseMessage,
-  publishSseEvent,
-  resetSsePublisherClient,
   serializeSseEvent,
 } from "@leadforge/shared";
+import {
+  publishSseEvent,
+  resetSsePublisherClient,
+} from "@leadforge/shared/publisher";
 
 describe("SSE event publisher", () => {
   it("serializes progress event with progressPct field", () => {

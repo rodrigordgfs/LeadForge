@@ -1,12 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
-  formatSseMessage,
   publishSseEvent,
   resetSsePublisherClient,
-  serializeSseEvent,
 } from "../src/events/publisher.js";
-import { sseChannelName } from "../src/events/sse.js";
+import {
+  formatSseMessage,
+  serializeSseEvent,
+  sseChannelName,
+} from "../src/events/sse.js";
 import { createRedisClient } from "../src/events/redis-client.js";
 
 describe("publishSseEvent", () => {

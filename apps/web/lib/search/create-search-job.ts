@@ -6,7 +6,7 @@ import {
   type CreateSearchResponse,
 } from "@leadforge/shared";
 
-import { validateSegmentInput } from "./validate-segment.js";
+import { validateSegmentInput } from "./validate-segment";
 
 export interface CreateSearchJobResult {
   ok: true;

@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./redis": {
+      "types": "./dist/events/redis-client.d.ts",
+      "import": "./dist/events/redis-client.js"
+    },
+    "./publisher": {
+      "types": "./dist/events/publisher.d.ts",
+      "import": "./dist/events/publisher.js"
     }
   },
   "scripts": {

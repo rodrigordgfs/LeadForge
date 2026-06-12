@@ -15,7 +15,7 @@
     "build": "tsc",
     "lint": "eslint . --no-error-on-unmatched-pattern",
     "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium",
-    "start": "node dist/index.js",
+    "start": "PLAYWRIGHT_BROWSERS_PATH=0 node --env-file=../../.env dist/index.js",
     "test": "PLAYWRIGHT_BROWSERS_PATH=0 vitest run",
     "dev": "tsc --watch"
   },

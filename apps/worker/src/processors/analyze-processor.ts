@@ -1,6 +1,6 @@
 import { prisma, type Prisma } from "@leadforge/db";
 import type { AnalyzeJobPayload } from "@leadforge/queue";
-import { publishSseEvent } from "@leadforge/shared";
+import { publishSseEvent } from "@leadforge/shared/publisher";
 import type { Job } from "bullmq";
 import { HybridSiteAuditor } from "../audit/hybrid-auditor.js";
 import type { MergedAuditResult } from "../audit/hybrid-auditor.js";

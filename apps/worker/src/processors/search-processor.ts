@@ -4,11 +4,11 @@ import {
   type SearchJobPayload,
 } from "@leadforge/queue";
 import {
-  publishSseEvent,
   type MapsScraper,
   type ScrapedBusiness,
   type ScrapeSearchInput,
 } from "@leadforge/shared";
+import { publishSseEvent } from "@leadforge/shared/publisher";
 import type { Job } from "bullmq";
 import { CaptchaDetectedError } from "../scraper/errors.js";
 import { upsertLeadFromScraped } from "../services/lead-upsert.js";
@@ -109,6 +109,11 @@ export async function processSearchJob(
     data: { status: SearchJobStatus.running, progressPct: 0, totalFound: 0 },
   });
 
+  await publishEvent(searchJobId, {
+    type: "progress",
+    payload: { progressPct: 0, totalFound: 0 },
+  });
+
   let businesses: ScrapedBusiness[];
 
   try {
@@ -126,6 +131,30 @@ export async function processSearchJob(
   }
 
   const totalExpected = businesses.length;
+
+  if (totalExpected === 0) {
+    await prisma.searchJob.update({
+      where: { id: searchJobId },
+      data: {
+        status: SearchJobStatus.completed,
+        progressPct: 100,
+        totalFound: 0,
+        completedAt: new Date(),
+      },
+    });
+
+    await publishEvent(searchJobId, {
+      type: "progress",
+      payload: { progressPct: 100, totalFound: 0 },
+    });
+
+    await publishEvent(searchJobId, {
+      type: "job_completed",
+      payload: { searchJobId, totalFound: 0 },
+    });
+    return;
+  }
+
   let scrapedCount = 0;
 
   for (const business of businesses) {

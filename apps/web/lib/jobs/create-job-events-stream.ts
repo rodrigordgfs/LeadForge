@@ -1,10 +1,10 @@
 import {
-  createRedisClient,
   formatSseMessage,
   isTerminalSseEvent,
   sseChannelName,
   sseEventSchema,
 } from "@leadforge/shared";
+import { createRedisClient } from "@leadforge/shared/redis";
 
 export function createJobEventsStream(
   searchJobId: string,
