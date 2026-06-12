@@ -28,11 +28,13 @@ export const SCORE_BAND_LABELS: Record<ScoreBandLabel, string> = {
   excellent: "Excelente",
 };
 
-export const SCORE_BAND_COLORS: Record<ScoreBandLabel, string> = {
-  critical: "bg-red-100 text-red-800 border-red-200",
-  low: "bg-orange-100 text-orange-800 border-orange-200",
-  medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  excellent: "bg-green-100 text-green-800 border-green-200",
+export type ScoreBandBadgeVariant = "critical" | "low" | "medium" | "excellent";
+
+export const SCORE_BAND_COLORS: Record<ScoreBandLabel, ScoreBandBadgeVariant> = {
+  critical: "critical",
+  low: "low",
+  medium: "medium",
+  excellent: "excellent",
 };
 
 export const JOB_PHASE_LABELS: Record<string, string> = {

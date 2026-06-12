@@ -1,5 +1,23 @@
 "use client";
 
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Separator,
+  Skeleton,
+  Textarea,
+} from "@leadforge/ui";
 import { useCallback, useEffect, useState } from "react";
 
 export interface ContactEntry {
@@ -85,65 +103,86 @@ export function ContactLog({ leadId }: ContactLogProps) {
 
   return (
     <section className="space-y-4" data-testid="contact-log">
-      <h2 className="text-lg font-semibold text-slate-900">Registro de contatos</h2>
+      <h2 className="text-lg font-semibold text-foreground">
+        Registro de contatos
+      </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-slate-200 p-4">
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">Anotações</span>
-          <textarea
-            value={notes}
-            onChange={(event) => setNotes(event.target.value)}
-            rows={3}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            data-testid="contact-notes"
-          />
-        </label>
+      <Card className="gap-4 py-4">
+        <CardHeader className="px-4 py-0">
+          <CardTitle className="text-sm">Novo contato</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="contact-notes">Anotações</Label>
+              <Textarea
+                id="contact-notes"
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                rows={3}
+                data-testid="contact-notes"
+              />
+            </div>
 
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">Resultado</span>
-          <select
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          >
-            <option value="follow_up">Follow-up</option>
-            <option value="interested">Interessado</option>
-            <option value="not_interested">Sem interesse</option>
-            <option value="scheduled">Reunião agendada</option>
-          </select>
-        </label>
+            <div className="space-y-2">
+              <Label htmlFor="contact-status">Resultado</Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger id="contact-status" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="follow_up">Follow-up</SelectItem>
+                  <SelectItem value="interested">Interessado</SelectItem>
+                  <SelectItem value="not_interested">Sem interesse</SelectItem>
+                  <SelectItem value="scheduled">Reunião agendada</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {error ? (
-          <p className="text-sm text-red-600" role="alert">
-            {error}
-          </p>
-        ) : null}
+            {error ? (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            ) : null}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-50"
-          data-testid="contact-submit"
-        >
-          {isSubmitting ? "Salvando…" : "Registrar contato"}
-        </button>
-      </form>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isSubmitting}
+              data-testid="contact-submit"
+            >
+              {isSubmitting ? "Salvando…" : "Registrar contato"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando histórico…</p>
+        <div className="space-y-2">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
       ) : contacts.length === 0 ? (
-        <p className="text-sm text-slate-500">Nenhum contato registrado.</p>
+        <p className="text-sm text-muted-foreground">
+          Nenhum contato registrado.
+        </p>
       ) : (
-        <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
-          {contacts.map((contact) => (
-            <li key={contact.id} className="px-4 py-3">
-              <p className="text-sm text-slate-900">{contact.notes}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {new Date(contact.date).toLocaleString("pt-BR")} · {contact.status}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <Card className="gap-0 py-0">
+          <ul>
+            {contacts.map((contact, index) => (
+              <li key={contact.id}>
+                {index > 0 ? <Separator /> : null}
+                <div className="px-4 py-3">
+                  <p className="text-sm text-foreground">{contact.notes}</p>
+                  <p className="mt-1 font-mono text-xs text-muted-foreground">
+                    {new Date(contact.date).toLocaleString("pt-BR")} ·{" "}
+                    {contact.status}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
       )}
     </section>
   );

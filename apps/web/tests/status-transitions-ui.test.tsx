@@ -27,12 +27,13 @@ describe("KanbanBoard", () => {
 
     for (const status of LEAD_STATUS_ORDER) {
       expect(screen.getByText(LEAD_STATUS_LABELS[status])).toBeTruthy();
+      expect(screen.getByTestId(`kanban-column-${status}`)).toBeTruthy();
     }
 
     expect(screen.getByTestId("kanban-board")).toBeTruthy();
   });
 
-  it("calls PATCH with Em Contato when lead dropped on em_contato column", async () => {
+  it("calls onStatusChange when lead dropped on em_contato column", async () => {
     const onStatusChange = vi.fn().mockResolvedValue(undefined);
 
     render(
@@ -70,6 +71,35 @@ describe("KanbanBoard", () => {
       expect(onStatusChange).toHaveBeenCalledWith("lead_1", "em_contato");
     });
   });
+
+  it("renders lead card with score badge", () => {
+    render(
+      <KanbanBoard
+        leadsByStatus={{
+          novo: [
+            {
+              id: "lead_1",
+              name: "Clínica ABC",
+              city: "Pelotas",
+              score: 30,
+              scoreBand: "critical",
+              status: "novo",
+            },
+          ],
+          em_contato: [],
+          interessado: [],
+          proposta_enviada: [],
+          negociacao: [],
+          fechado: [],
+          perdido: [],
+        }}
+        onStatusChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("kanban-card-lead_1")).toBeTruthy();
+    expect(screen.getByTestId("score-badge")).toBeTruthy();
+  });
 });
 
 describe("SettingsView", () => {
@@ -97,6 +127,14 @@ describe("SettingsView", () => {
 
     const slider = await screen.findByTestId("threshold-slider");
     expect((slider as HTMLInputElement).value).toBe("60");
+  });
+
+  it("renders scope, deadline, and monthly fee inputs after load", async () => {
+    render(<SettingsView />);
+
+    expect(await screen.findByLabelText("Escopo padrão")).toBeTruthy();
+    expect(screen.getByLabelText("Prazo padrão")).toBeTruthy();
+    expect(screen.getByLabelText("Mensalidade padrão (R$)")).toBeTruthy();
   });
 
   it("calls PATCH /api/settings with new threshold on save", async () => {

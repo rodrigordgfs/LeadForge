@@ -14,19 +14,22 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium",
-    "start": "PLAYWRIGHT_BROWSERS_PATH=0 node --env-file=../../.env dist/index.js",
-    "test": "PLAYWRIGHT_BROWSERS_PATH=0 vitest run",
+    "postinstall": "playwright install chromium",
+    "setup:playwright": "bash scripts/setup-playwright.sh",
+    "start": "node --env-file=../../.env dist/index.js",
+    "test": "vitest run",
     "dev": "tsc --watch"
   },
   "dependencies": {
     "@leadforge/db": "workspace:*",
     "@leadforge/queue": "workspace:*",
     "@leadforge/shared": "workspace:*",
+    "@leadforge/ui": "workspace:*",
+    "geist": "^1.3.1",
     "@react-pdf/renderer": "^4.2.0",
     "bullmq": "^5.34.8",
     "openai": "^4.77.0",
-    "playwright": "^1.49.0",
+    "playwright": "^1.60.0",
     "react": "^19.0.0",
     "zod": "^3.24.1"
   },

@@ -1,6 +1,15 @@
 "use client";
 
 import type { LeadStatus } from "@leadforge/db";
+import {
+  Alert,
+  AlertDescription,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@leadforge/ui";
 import { useState } from "react";
 
 import { ScoreBadge } from "@/components/leads/score-badge";
@@ -50,49 +59,53 @@ export function KanbanBoard({ leadsByStatus, onStatusChange }: KanbanBoardProps)
   return (
     <div className="space-y-4" data-testid="kanban-board">
       {error ? (
-        <p className="text-sm text-red-600" role="alert">
-          {error}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       <div className="flex gap-4 overflow-x-auto pb-4">
         {LEAD_STATUS_ORDER.map((status) => (
-          <div
+          <Card
             key={status}
-            className="min-w-[240px] flex-shrink-0 rounded-lg border border-slate-200 bg-slate-50"
+            className="min-w-[240px] shrink-0 gap-0 bg-muted/30 py-0"
             data-testid={`kanban-column-${status}`}
             onDragOver={(event) => event.preventDefault()}
             onDrop={() => void handleDrop(status)}
           >
-            <header className="border-b border-slate-200 px-3 py-2">
-              <h3 className="text-sm font-semibold text-slate-800">
+            <CardHeader className="gap-1 border-b px-3 py-2">
+              <CardTitle className="text-sm">
                 {LEAD_STATUS_LABELS[status]}
-              </h3>
-              <p className="text-xs text-slate-500">
+              </CardTitle>
+              <CardDescription>
                 {leadsByStatus[status]?.length ?? 0} leads
-              </p>
-            </header>
+              </CardDescription>
+            </CardHeader>
 
-            <ul className="space-y-2 p-2">
-              {(leadsByStatus[status] ?? []).map((lead) => (
-                <li
-                  key={lead.id}
-                  draggable
-                  onDragStart={() => setDraggedLeadId(lead.id)}
-                  className="cursor-grab rounded-md border border-slate-200 bg-white p-3 shadow-sm active:cursor-grabbing"
-                  data-testid={`kanban-card-${lead.id}`}
-                >
-                  <p className="text-sm font-medium text-slate-900">
-                    {lead.name}
-                  </p>
-                  <p className="text-xs text-slate-500">{lead.city}</p>
-                  <div className="mt-2">
-                    <ScoreBadge score={lead.score} band={lead.scoreBand} />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <CardContent className="p-2">
+              <ul className="space-y-2">
+                {(leadsByStatus[status] ?? []).map((lead) => (
+                  <Card
+                    key={lead.id}
+                    draggable
+                    onDragStart={() => setDraggedLeadId(lead.id)}
+                    className="cursor-grab gap-2 py-3 shadow-xs active:cursor-grabbing"
+                    data-testid={`kanban-card-${lead.id}`}
+                  >
+                    <CardContent className="px-3 py-0">
+                      <p className="text-sm font-medium text-foreground">
+                        {lead.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{lead.city}</p>
+                      <div className="mt-2">
+                        <ScoreBadge score={lead.score} band={lead.scoreBand} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

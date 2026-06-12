@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  registerGeistFonts,
+  resolveGeistFontDirs,
+} from "../src/artifacts/pdf/fonts.js";
+import {
   renderDiagnosisPdf,
   renderProposalPdf,
   renderWireframePdf,
 } from "../src/artifacts/pdf-renderer.js";
+import { geistTokens, pdfStyles } from "../src/artifacts/pdf/styles.js";
 
 const proposal = {
   scope: "Site institucional + SEO local",
@@ -31,6 +36,28 @@ const wireframe = {
     },
   ],
 };
+
+describe("pdf fonts", () => {
+  it("resolves geist package font directories", () => {
+    const dirs = resolveGeistFontDirs();
+
+    expect(dirs.sansDir).toContain("geist-sans");
+    expect(dirs.monoDir).toContain("geist-mono");
+  });
+
+  it("registerGeistFonts completes without throwing when geist fonts exist", () => {
+    expect(() => registerGeistFonts()).not.toThrow();
+  });
+});
+
+describe("pdf styles", () => {
+  it("uses geistTokens.dark.foreground instead of hardcoded subtitle gray", () => {
+    expect(pdfStyles.subtitle.color).toBe(geistTokens.dark.mutedForeground);
+    expect(pdfStyles.subtitle.color).not.toBe("#444444");
+    expect(pdfStyles.page.color).toBe(geistTokens.dark.foreground);
+    expect(pdfStyles.page.fontFamily).toBe("Geist Sans");
+  });
+});
 
 describe("pdf renderer", () => {
   it("produces non-empty proposal PDF buffer for fixture data", async () => {

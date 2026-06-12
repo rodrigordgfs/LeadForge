@@ -1,3 +1,10 @@
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@leadforge/ui";
+
 interface DiagnosisPanelProps {
   problems?: string[];
   opportunities?: string[];
@@ -6,33 +13,43 @@ interface DiagnosisPanelProps {
 export function DiagnosisPanel({ problems = [], opportunities = [] }: DiagnosisPanelProps) {
   return (
     <section className="grid gap-4 md:grid-cols-2" data-testid="diagnosis-panel">
-      <div className="rounded-lg border border-red-100 bg-red-50/50 p-4">
-        <h3 className="text-sm font-semibold text-red-900">Problemas</h3>
-        {problems.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600">Nenhum problema identificado.</p>
-        ) : (
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
-            {problems.map((problem) => (
-              <li key={problem}>{problem}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <Card className="gap-4 border-destructive/25 bg-destructive/5 py-4">
+        <CardHeader className="px-4 py-0">
+          <CardTitle className="text-sm text-destructive">Problemas</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4">
+          {problems.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhum problema identificado.
+            </p>
+          ) : (
+            <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+              {problems.map((problem) => (
+                <li key={problem}>{problem}</li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4">
-        <h3 className="text-sm font-semibold text-emerald-900">Oportunidades</h3>
-        {opportunities.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-600">
-            Nenhuma oportunidade identificada.
-          </p>
-        ) : (
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
-            {opportunities.map((opportunity) => (
-              <li key={opportunity}>{opportunity}</li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <Card className="gap-4 border-success/25 bg-success/5 py-4">
+        <CardHeader className="px-4 py-0">
+          <CardTitle className="text-sm text-success">Oportunidades</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4">
+          {opportunities.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma oportunidade identificada.
+            </p>
+          ) : (
+            <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+              {opportunities.map((opportunity) => (
+                <li key={opportunity}>{opportunity}</li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </section>
   );
 }

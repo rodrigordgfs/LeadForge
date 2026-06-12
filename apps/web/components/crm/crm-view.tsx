@@ -1,6 +1,7 @@
 "use client";
 
 import type { LeadStatus } from "@leadforge/db";
+import { Alert, AlertDescription, Skeleton } from "@leadforge/ui";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -76,20 +77,24 @@ export function CrmView() {
   return (
     <section className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">CRM</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="text-2xl font-semibold text-foreground">CRM</h1>
+        <p className="text-sm text-muted-foreground">
           Arraste leads entre colunas para atualizar o status.
         </p>
       </header>
 
       {error ? (
-        <p className="text-sm text-red-600" role="alert">
-          {error}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       {isLoading ? (
-        <p className="text-sm text-slate-500">Carregando pipeline…</p>
+        <div className="flex gap-4 overflow-x-auto pb-4" data-testid="crm-loading">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-64 min-w-[240px] shrink-0" />
+          ))}
+        </div>
       ) : (
         <KanbanBoard
           leadsByStatus={leadsByStatus}

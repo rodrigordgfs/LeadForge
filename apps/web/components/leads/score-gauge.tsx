@@ -7,19 +7,18 @@ interface ScoreGaugeProps {
   band?: ScoreBandLabel | null;
 }
 
+const BAND_STROKE: Record<ScoreBandLabel, string> = {
+  critical: "var(--color-destructive)",
+  low: "var(--color-warning)",
+  medium: "var(--color-muted-foreground)",
+  excellent: "var(--color-success)",
+};
+
 export function ScoreGauge({ score, band }: ScoreGaugeProps) {
   const normalizedScore = score ?? 0;
   const resolvedBand = band ?? "critical";
   const label = SCORE_BAND_LABELS[resolvedBand];
-
-  const strokeColor =
-    resolvedBand === "excellent"
-      ? "#059669"
-      : resolvedBand === "medium"
-        ? "#ca8a04"
-        : resolvedBand === "low"
-          ? "#ea580c"
-          : "#dc2626";
+  const strokeColor = BAND_STROKE[resolvedBand];
 
   const circumference = 2 * Math.PI * 45;
   const offset = circumference - (normalizedScore / 100) * circumference;
@@ -32,7 +31,7 @@ export function ScoreGauge({ score, band }: ScoreGaugeProps) {
           cy="60"
           r="45"
           fill="none"
-          stroke="#e2e8f0"
+          stroke="var(--color-border)"
           strokeWidth="10"
         />
         <circle
@@ -51,7 +50,7 @@ export function ScoreGauge({ score, band }: ScoreGaugeProps) {
           x="60"
           y="58"
           textAnchor="middle"
-          className="fill-slate-900 text-xl font-semibold"
+          className="fill-foreground font-mono text-xl font-semibold"
           fontSize="22"
         >
           {score ?? "—"}
@@ -60,13 +59,13 @@ export function ScoreGauge({ score, band }: ScoreGaugeProps) {
           x="60"
           y="78"
           textAnchor="middle"
-          className="fill-slate-500"
+          className="fill-muted-foreground font-mono"
           fontSize="11"
         >
           / 100
         </text>
       </svg>
-      <p className="text-sm font-medium text-slate-700">{label}</p>
+      <p className="text-sm font-medium text-foreground">{label}</p>
     </div>
   );
 }
