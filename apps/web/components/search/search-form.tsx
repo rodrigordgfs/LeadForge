@@ -5,6 +5,23 @@ import {
   getAllSegments,
   type CreateSearchInput,
 } from "@leadforge/shared";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@leadforge/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -92,154 +109,177 @@ export function SearchForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">Segmento</span>
-          <select
-            value={segmentId}
-            onChange={(event) => handleSegmentChange(event.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            data-testid="segment-select"
-          >
-            {segments.map((segment) => (
-              <option key={segment.id} value={segment.id}>
-                {segment.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="space-y-2">
+          <Label htmlFor="segment">Segmento</Label>
+          <Select value={segmentId} onValueChange={handleSegmentChange}>
+            <SelectTrigger
+              id="segment"
+              className="w-full"
+              data-testid="segment-select"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {segments.map((segment) => (
+                <SelectItem key={segment.id} value={segment.id}>
+                  {segment.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">
-            Subcategoria (opcional)
-          </span>
-          <select
-            value={subcategoryId}
-            onChange={(event) => setSubcategoryId(event.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            data-testid="subcategory-select"
-          >
-            <option value="">Todas</option>
-            {selectedSegment?.subcategories.map((subcategory) => (
-              <option key={subcategory.id} value={subcategory.id}>
-                {subcategory.name}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">Estado</span>
-          <select
-            value={state}
-            onChange={(event) =>
-              setState(event.target.value as (typeof BRAZILIAN_UFS)[number])
+        <div className="space-y-2">
+          <Label htmlFor="subcategory">Subcategoria (opcional)</Label>
+          <Select
+            value={subcategoryId || "all"}
+            onValueChange={(value) =>
+              setSubcategoryId(value === "all" ? "" : value)
             }
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           >
-            {BRAZILIAN_UFS.map((uf) => (
-              <option key={uf} value={uf}>
-                {uf}
-              </option>
-            ))}
-          </select>
-        </label>
+            <SelectTrigger
+              id="subcategory"
+              className="w-full"
+              data-testid="subcategory-select"
+            >
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas</SelectItem>
+              {selectedSegment?.subcategories.map((subcategory) => (
+                <SelectItem key={subcategory.id} value={subcategory.id}>
+                  {subcategory.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-        <label className="block space-y-1">
-          <span className="text-sm font-medium text-slate-700">Cidade</span>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="state">Estado</Label>
+          <Select
+            value={state}
+            onValueChange={(value) =>
+              setState(value as (typeof BRAZILIAN_UFS)[number])
+            }
+          >
+            <SelectTrigger id="state" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {BRAZILIAN_UFS.map((uf) => (
+                <SelectItem key={uf} value={uf}>
+                  {uf}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">Cidade</Label>
+          <Input
+            id="city"
             type="text"
             value={city}
             onChange={(event) => setCity(event.target.value)}
             placeholder="Ex.: São Paulo"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            aria-invalid={cityError ? true : undefined}
             data-testid="city-input"
           />
           {cityError ? (
-            <span className="text-xs text-red-600">{cityError}</span>
+            <p className="text-xs text-destructive">{cityError}</p>
           ) : null}
-        </label>
+        </div>
 
-        <label className="block space-y-1 md:col-span-2">
-          <span className="text-sm font-medium text-slate-700">
-            Raio (km): {radiusKm}
-          </span>
-          <input
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="radius">
+            Raio (km): <span className="font-mono">{radiusKm}</span>
+          </Label>
+          <Input
+            id="radius"
             type="range"
             min={1}
             max={50}
             value={radiusKm}
             onChange={(event) => setRadiusKm(Number(event.target.value))}
-            className="w-full"
+            className="h-2 cursor-pointer p-0"
           />
-        </label>
+        </div>
       </div>
 
-      <fieldset className="rounded-lg border border-slate-200 p-4">
-        <legend className="px-1 text-sm font-medium text-slate-700">
-          Filtros opcionais
-        </legend>
-        <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={hasWebsite}
-              onChange={(event) => setHasWebsite(event.target.checked)}
-            />
-            Possui site
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={noWebsite}
-              onChange={(event) => setNoWebsite(event.target.checked)}
-            />
-            Sem site
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={hasWhatsapp}
-              onChange={(event) => setHasWhatsapp(event.target.checked)}
-            />
-            Possui WhatsApp
-          </label>
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={hasInstagram}
-              onChange={(event) => setHasInstagram(event.target.checked)}
-            />
-            Possui Instagram
-          </label>
-          <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-            <span>Avaliação mínima (0–5)</span>
-            <input
-              type="number"
-              min={0}
-              max={5}
-              step={0.1}
-              value={minRating}
-              onChange={(event) => setMinRating(event.target.value)}
-              className="rounded-md border border-slate-300 px-3 py-2"
-              placeholder="Ex.: 4.0"
-            />
-          </label>
-        </div>
-      </fieldset>
+      <Card className="gap-4 py-4">
+        <CardHeader className="px-4 py-0">
+          <CardTitle className="text-sm">Filtros opcionais</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="hasWebsite"
+                checked={hasWebsite}
+                onCheckedChange={(checked) => setHasWebsite(checked === true)}
+              />
+              <Label htmlFor="hasWebsite" className="font-normal">
+                Possui site
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="noWebsite"
+                checked={noWebsite}
+                onCheckedChange={(checked) => setNoWebsite(checked === true)}
+              />
+              <Label htmlFor="noWebsite" className="font-normal">
+                Sem site
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="hasWhatsapp"
+                checked={hasWhatsapp}
+                onCheckedChange={(checked) => setHasWhatsapp(checked === true)}
+              />
+              <Label htmlFor="hasWhatsapp" className="font-normal">
+                Possui WhatsApp
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="hasInstagram"
+                checked={hasInstagram}
+                onCheckedChange={(checked) => setHasInstagram(checked === true)}
+              />
+              <Label htmlFor="hasInstagram" className="font-normal">
+                Possui Instagram
+              </Label>
+            </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="minRating">Avaliação mínima (0–5)</Label>
+              <Input
+                id="minRating"
+                type="number"
+                min={0}
+                max={5}
+                step={0.1}
+                value={minRating}
+                onChange={(event) => setMinRating(event.target.value)}
+                placeholder="Ex.: 4.0"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {submitError ? (
-        <p className="text-sm text-red-600" role="alert">
-          {submitError}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? "Iniciando busca…" : "Iniciar busca"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -21,29 +21,35 @@ describe("SearchForm", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders all segments in select dropdown", () => {
+  it("renders segment, state, city, and radius fields with accessible labels", () => {
     render(<SearchForm />);
 
-    const segmentSelect = screen.getByTestId("segment-select");
-    const options = segmentSelect.querySelectorAll("option");
-
-    expect(options).toHaveLength(getAllSegments().length);
+    expect(screen.getByLabelText("Segmento")).toBeTruthy();
+    expect(screen.getByLabelText("Estado")).toBeTruthy();
+    expect(screen.getByLabelText("Cidade")).toBeTruthy();
+    expect(screen.getByLabelText(/Raio \(km\)/i)).toBeTruthy();
+    expect(screen.getByTestId("segment-select")).toBeTruthy();
+    expect(screen.getByTestId("city-input")).toBeTruthy();
   });
 
-  it("updates subcategory select when parent segment changes", () => {
+  it("shows first segment as default selection", () => {
     render(<SearchForm />);
 
-    fireEvent.change(screen.getByTestId("segment-select"), {
-      target: { value: "alimentacao" },
-    });
-
-    const subcategorySelect = screen.getByTestId("subcategory-select");
-    const labels = Array.from(subcategorySelect.querySelectorAll("option")).map(
-      (option) => option.textContent,
+    const firstSegment = getAllSegments()[0];
+    expect(screen.getByTestId("segment-select").textContent).toContain(
+      firstSegment?.name ?? "",
     );
+  });
 
-    expect(labels).toContain("Restaurante");
-    expect(labels).not.toContain("Clínica Médica");
+  it("updates subcategory options when parent segment changes", async () => {
+    render(<SearchForm />);
+
+    fireEvent.click(screen.getByTestId("segment-select"));
+    fireEvent.click(await screen.findByRole("option", { name: "Alimentação" }));
+
+    fireEvent.click(screen.getByTestId("subcategory-select"));
+    expect(await screen.findByRole("option", { name: "Restaurante" })).toBeTruthy();
+    expect(screen.queryByRole("option", { name: "Clínica Médica" })).toBeNull();
   });
 
   it("prevents submit with empty cidade field", async () => {

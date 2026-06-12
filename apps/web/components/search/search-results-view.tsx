@@ -1,5 +1,6 @@
 "use client";
 
+import { Alert, AlertDescription } from "@leadforge/ui";
 import { useCallback, useEffect, useState } from "react";
 
 import { JobProgress } from "@/components/search/job-progress";
@@ -58,6 +59,11 @@ export function SearchResultsView({ searchId }: SearchResultsPageProps) {
     onLeadAnalyzed: () => {
       void fetchLeads();
     },
+    onEvent: (event) => {
+      if (event.type === "lead_scraped" || event.type === "progress") {
+        void fetchLeads();
+      }
+    },
     onComplete: () => {
       setJobActive(false);
       void fetchLeads();
@@ -70,10 +76,10 @@ export function SearchResultsView({ searchId }: SearchResultsPageProps) {
   return (
     <section className="space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">
+        <h1 className="text-2xl font-semibold text-foreground">
           Resultados da busca
         </h1>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted-foreground">
           Leads ordenados por score (menor oportunidade primeiro).
         </p>
       </header>
@@ -102,9 +108,9 @@ export function SearchResultsView({ searchId }: SearchResultsPageProps) {
       />
 
       {fetchError ? (
-        <p className="text-sm text-red-600" role="alert">
-          {fetchError}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{fetchError}</AlertDescription>
+        </Alert>
       ) : null}
 
       <LeadList
@@ -113,6 +119,9 @@ export function SearchResultsView({ searchId }: SearchResultsPageProps) {
         offset={offset}
         limit={PAGE_SIZE}
         isLoading={isLoading}
+        searchCompleted={
+          jobState.status === "completed" || jobState.status === "failed"
+        }
         onPageChange={setOffset}
       />
     </section>
