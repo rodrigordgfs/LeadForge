@@ -1,6 +1,17 @@
 "use client";
 
 import type { LeadStatus, ScoreBand } from "@leadforge/db";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@leadforge/ui";
 import { useCallback, useState } from "react";
 
 import { ContactLog } from "@/components/crm/contact-log";
@@ -150,10 +161,10 @@ export function LeadDetail({ lead, onLeadUpdated }: LeadDetailProps) {
     <div className="space-y-8">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-semibold text-foreground">
             {currentLead.name}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {currentLead.category} · {currentLead.address}, {currentLead.city}/
             {currentLead.state}
           </p>
@@ -161,32 +172,31 @@ export function LeadDetail({ lead, onLeadUpdated }: LeadDetailProps) {
 
         <div className="flex flex-wrap gap-2">
           {currentLead.whatsapp ? (
-            <a
-              href={formatWhatsappLink(currentLead.whatsapp)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md bg-emerald-600 px-3 py-2 text-sm text-white"
-            >
-              WhatsApp
-            </a>
+            <Button size="sm" asChild>
+              <a
+                href={formatWhatsappLink(currentLead.whatsapp)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                WhatsApp
+              </a>
+            </Button>
           ) : null}
           {currentLead.phone ? (
-            <a
-              href={`tel:${currentLead.phone}`}
-              className="rounded-md border border-slate-200 px-3 py-2 text-sm"
-            >
-              Ligar
-            </a>
+            <Button variant="outline" size="sm" asChild>
+              <a href={`tel:${currentLead.phone}`}>Ligar</a>
+            </Button>
           ) : null}
           {currentLead.website ? (
-            <a
-              href={currentLead.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md border border-slate-200 px-3 py-2 text-sm"
-            >
-              Visitar site
-            </a>
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={currentLead.website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Visitar site
+              </a>
+            </Button>
           ) : null}
         </div>
       </header>
@@ -195,59 +205,63 @@ export function LeadDetail({ lead, onLeadUpdated }: LeadDetailProps) {
         <ScoreGauge score={currentLead.score} band={currentLead.scoreBand} />
 
         <div className="space-y-4">
-          <label className="block space-y-1">
-            <span className="text-sm font-medium text-slate-700">
-              Status no CRM
-            </span>
-            <select
+          <div className="space-y-1">
+            <Label htmlFor="crm-status">Status no CRM</Label>
+            <Select
               value={currentLead.status}
-              onChange={(event) =>
-                void handleStatusChange(event.target.value as LeadStatus)
-              }
-              className="w-full max-w-xs rounded-md border border-slate-300 px-3 py-2 text-sm"
-              data-testid="crm-status-select"
+              onValueChange={(value) => void handleStatusChange(value as LeadStatus)}
             >
-              {LEAD_STATUS_ORDER.map((status) => (
-                <option key={status} value={status}>
-                  {LEAD_STATUS_LABELS[status]}
-                </option>
-              ))}
-            </select>
-          </label>
+              <SelectTrigger
+                id="crm-status"
+                className="w-full max-w-xs"
+                data-testid="crm-status-select"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_STATUS_ORDER.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {LEAD_STATUS_LABELS[status]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex flex-wrap gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => void handleAnalyze()}
               disabled={isAnalyzing}
-              className="rounded-md border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-50"
               data-testid="trigger-analyze"
             >
               {isAnalyzing ? "Enfileirando…" : "Gerar diagnóstico"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="sm"
               onClick={() => void handleGenerateArtifacts()}
               disabled={isGeneratingArtifacts}
-              className="rounded-md bg-slate-900 px-3 py-2 text-sm text-white hover:bg-slate-800 disabled:opacity-50"
               data-testid="trigger-artifacts"
             >
               {isGeneratingArtifacts
                 ? "Enfileirando…"
                 : "Gerar pacote completo"}
-            </button>
+            </Button>
           </div>
 
           {actionError ? (
-            <p className="text-sm text-red-600" role="alert">
-              {actionError}
-            </p>
+            <Alert variant="destructive">
+              <AlertDescription>{actionError}</AlertDescription>
+            </Alert>
           ) : null}
         </div>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-900">Diagnóstico</h2>
+        <h2 className="text-lg font-semibold text-foreground">Diagnóstico</h2>
         <DiagnosisPanel
           problems={currentLead.diagnosis?.problems}
           opportunities={currentLead.diagnosis?.opportunities}
@@ -255,14 +269,14 @@ export function LeadDetail({ lead, onLeadUpdated }: LeadDetailProps) {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-900">Artefatos</h2>
+        <h2 className="text-lg font-semibold text-foreground">Artefatos</h2>
         <ArtifactList
           leadId={currentLead.id}
           artifacts={currentLead.artifacts}
           wireframePreview={wireframePreviewFromDiagnosis(currentLead.diagnosis)}
         />
         {(isGeneratingArtifacts || currentLead.autoPipelineTriggered) && (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Gerando artefatos… novos downloads aparecerão automaticamente.
           </p>
         )}

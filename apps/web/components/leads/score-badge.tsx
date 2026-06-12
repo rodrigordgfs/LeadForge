@@ -1,4 +1,5 @@
 import type { ScoreBandLabel } from "@leadforge/shared";
+import { Badge } from "@leadforge/ui";
 
 import {
   SCORE_BAND_COLORS,
@@ -13,23 +14,20 @@ interface ScoreBadgeProps {
 export function ScoreBadge({ score, band }: ScoreBadgeProps) {
   if (score == null) {
     return (
-      <span className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-500">
+      <Badge variant="outline" data-testid="score-badge">
         Pendente
-      </span>
+      </Badge>
     );
   }
 
   const resolvedBand = band ?? "critical";
-  const colorClass = SCORE_BAND_COLORS[resolvedBand];
+  const variant = SCORE_BAND_COLORS[resolvedBand];
   const label = SCORE_BAND_LABELS[resolvedBand];
 
   return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${colorClass}`}
-      data-testid="score-badge"
-    >
-      <span>{score}</span>
+    <Badge variant={variant} data-testid="score-badge">
+      <span className="font-mono">{score}</span>
       <span className="opacity-80">· {label}</span>
-    </span>
+    </Badge>
   );
 }

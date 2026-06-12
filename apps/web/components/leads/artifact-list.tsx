@@ -1,5 +1,7 @@
 "use client";
 
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@leadforge/ui";
+
 import { ARTIFACT_TYPE_LABELS } from "@/lib/constants/labels";
 
 export interface ArtifactMeta {
@@ -29,7 +31,7 @@ export function ArtifactList({
 }: ArtifactListProps) {
   if (artifacts.length === 0) {
     return (
-      <p className="text-sm text-slate-600" data-testid="artifact-list-empty">
+      <p className="text-sm text-muted-foreground" data-testid="artifact-list-empty">
         Nenhum artefato gerado ainda.
       </p>
     );
@@ -37,41 +39,46 @@ export function ArtifactList({
 
   return (
     <div className="space-y-4" data-testid="artifact-list">
-      <ul className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
-        {artifacts.map((artifact) => (
-          <li
-            key={artifact.type}
-            className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
-          >
-            <div>
-              <p className="text-sm font-medium text-slate-900">
-                {ARTIFACT_TYPE_LABELS[artifact.type] ?? artifact.type}
-              </p>
-              <p className="text-xs text-slate-500">
-                {artifact.filename} · {formatBytes(artifact.sizeBytes)}
-              </p>
-            </div>
-            <a
-              href={`/api/leads/${leadId}/artifacts/${artifact.type}`}
-              download={artifact.filename}
-              className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
-              data-testid={`artifact-download-${artifact.type}`}
+      <Card className="gap-0 py-0">
+        <ul className="divide-y divide-border">
+          {artifacts.map((artifact) => (
+            <li
+              key={artifact.type}
+              className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
             >
-              Baixar
-            </a>
-          </li>
-        ))}
-      </ul>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {ARTIFACT_TYPE_LABELS[artifact.type] ?? artifact.type}
+                </p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  {artifact.filename} · {formatBytes(artifact.sizeBytes)}
+                </p>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <a
+                  href={`/api/leads/${leadId}/artifacts/${artifact.type}`}
+                  download={artifact.filename}
+                  data-testid={`artifact-download-${artifact.type}`}
+                >
+                  Baixar
+                </a>
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </Card>
 
       {wireframePreview ? (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <h4 className="text-sm font-medium text-slate-900">
-            Prévia do wireframe
-          </h4>
-          <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs text-slate-700">
-            {wireframePreview}
-          </pre>
-        </div>
+        <Card className="gap-4 bg-muted/50 py-4">
+          <CardHeader className="px-4 py-0">
+            <CardTitle className="text-sm">Prévia do wireframe</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs text-foreground">
+              {wireframePreview}
+            </pre>
+          </CardContent>
+        </Card>
       ) : null}
     </div>
   );
