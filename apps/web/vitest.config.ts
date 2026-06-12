@@ -15,19 +15,41 @@ export default defineConfig({
     ],
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "."),
-      "@leadforge/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
-      "@leadforge/shared/redis": path.resolve(
-        __dirname,
-        "../../packages/shared/src/events/redis-client.ts",
-      ),
-      "@leadforge/shared/publisher": path.resolve(
-        __dirname,
-        "../../packages/shared/src/events/publisher.ts",
-      ),
-      "@leadforge/db": path.resolve(__dirname, "../../packages/db/src/index.ts"),
-      "@leadforge/queue": path.resolve(__dirname, "../../packages/queue/src/index.ts"),
-    },
+    alias: [
+      {
+        find: "@leadforge/shared/publisher",
+        replacement: path.resolve(
+          __dirname,
+          "../../packages/shared/src/events/publisher.ts",
+        ),
+      },
+      {
+        find: "@leadforge/shared/redis",
+        replacement: path.resolve(
+          __dirname,
+          "../../packages/shared/src/events/redis-client.ts",
+        ),
+      },
+      {
+        find: "@leadforge/shared",
+        replacement: path.resolve(__dirname, "../../packages/shared/src/index.ts"),
+      },
+      {
+        find: "@leadforge/ui",
+        replacement: path.resolve(__dirname, "../../packages/ui/src/index.ts"),
+      },
+      {
+        find: "@leadforge/db",
+        replacement: path.resolve(__dirname, "../../packages/db/src/index.ts"),
+      },
+      {
+        find: "@leadforge/queue",
+        replacement: path.resolve(__dirname, "../../packages/queue/src/index.ts"),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "."),
+      },
+    ],
   },
 });
