@@ -7,6 +7,18 @@ vi.mock("next/navigation", () => ({
   usePathname: () => pathnameMock(),
 }));
 
+vi.mock("next/image", () => ({
+  default: ({
+    src,
+    alt,
+    ...props
+  }: {
+    src: string;
+    alt: string;
+    [key: string]: unknown;
+  }) => <img src={src} alt={alt} {...props} />,
+}));
+
 import { AppSidebar, navItems } from "@/components/shell/app-sidebar";
 
 describe("AppSidebar", () => {
@@ -15,7 +27,15 @@ describe("AppSidebar", () => {
     vi.clearAllMocks();
   });
 
-  it("renders four nav links with correct hrefs", () => {
+  it("renders Shinoda Labs logo above navigation", () => {
+    render(<AppSidebar />);
+
+    const logo = screen.getByTestId("shinoda-labs-logo");
+    expect(logo.getAttribute("src")).toBe("/shinoda-labs-logo.png");
+    expect(logo.getAttribute("alt")).toBe("Shinoda Labs");
+  });
+
+  it("renders nav links with correct hrefs", () => {
     render(<AppSidebar />);
 
     for (const item of navItems) {

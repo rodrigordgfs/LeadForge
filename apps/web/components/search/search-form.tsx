@@ -17,7 +17,6 @@ import {
   Input,
   Label,
   Select,
-  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -25,9 +24,15 @@ import {
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { ModalSelectContent } from "@/components/ui/modal-select-content";
+
 const segments = getAllSegments();
 
-export function SearchForm() {
+interface SearchFormProps {
+  onSuccess?: (searchJobId: string) => void;
+}
+
+export function SearchForm({ onSuccess }: SearchFormProps) {
   const router = useRouter();
   const [segmentId, setSegmentId] = useState(segments[0]?.id ?? "");
   const [subcategoryId, setSubcategoryId] = useState("");
@@ -96,7 +101,11 @@ export function SearchForm() {
       }
 
       const data = (await response.json()) as { searchJobId: string };
-      router.push(`/busca/${data.searchJobId}`);
+      if (onSuccess) {
+        onSuccess(data.searchJobId);
+      } else {
+        router.push(`/busca/${data.searchJobId}`);
+      }
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Falha ao iniciar busca",
@@ -119,13 +128,13 @@ export function SearchForm() {
             >
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <ModalSelectContent>
               {segments.map((segment) => (
                 <SelectItem key={segment.id} value={segment.id}>
                   {segment.name}
                 </SelectItem>
               ))}
-            </SelectContent>
+            </ModalSelectContent>
           </Select>
         </div>
 
@@ -144,14 +153,14 @@ export function SearchForm() {
             >
               <SelectValue placeholder="Todas" />
             </SelectTrigger>
-            <SelectContent>
+            <ModalSelectContent>
               <SelectItem value="all">Todas</SelectItem>
               {selectedSegment?.subcategories.map((subcategory) => (
                 <SelectItem key={subcategory.id} value={subcategory.id}>
                   {subcategory.name}
                 </SelectItem>
               ))}
-            </SelectContent>
+            </ModalSelectContent>
           </Select>
         </div>
 
@@ -166,13 +175,13 @@ export function SearchForm() {
             <SelectTrigger id="state" className="w-full">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <ModalSelectContent>
               {BRAZILIAN_UFS.map((uf) => (
                 <SelectItem key={uf} value={uf}>
                   {uf}
                 </SelectItem>
               ))}
-            </SelectContent>
+            </ModalSelectContent>
           </Select>
         </div>
 

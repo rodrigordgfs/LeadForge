@@ -33,6 +33,51 @@ describe("KanbanBoard", () => {
     expect(screen.getByTestId("kanban-board")).toBeTruthy();
   });
 
+  it("shows empty message in columns without leads", () => {
+    const grouped = Object.fromEntries(
+      LEAD_STATUS_ORDER.map((status) => [status, []]),
+    ) as Record<(typeof LEAD_STATUS_ORDER)[number], []>;
+
+    render(
+      <KanbanBoard leadsByStatus={grouped} onStatusChange={vi.fn()} />,
+    );
+
+    for (const status of LEAD_STATUS_ORDER) {
+      expect(screen.getByTestId(`kanban-empty-${status}`).textContent).toBe(
+        "Nenhum lead nesta etapa",
+      );
+    }
+  });
+
+  it("shows placeholder when lead card is missing city", () => {
+    render(
+      <KanbanBoard
+        leadsByStatus={{
+          novo: [
+            {
+              id: "lead_2",
+              name: "Loja sem cidade",
+              city: "",
+              score: null,
+              scoreBand: null,
+              status: "novo",
+            },
+          ],
+          em_contato: [],
+          interessado: [],
+          proposta_enviada: [],
+          negociacao: [],
+          fechado: [],
+          perdido: [],
+        }}
+        onStatusChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Cidade não informada")).toBeTruthy();
+    expect(screen.getByText("Pendente")).toBeTruthy();
+  });
+
   it("calls onStatusChange when lead dropped on em_contato column", async () => {
     const onStatusChange = vi.fn().mockResolvedValue(undefined);
 

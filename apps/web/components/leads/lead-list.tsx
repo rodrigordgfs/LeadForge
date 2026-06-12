@@ -51,7 +51,7 @@ export function LeadList({
   const hasPrev = offset > 0;
   const hasNext = offset + limit < total;
 
-  if (isLoading) {
+  if (isLoading && leads.length === 0) {
     return (
       <div className="space-y-3" data-testid="lead-list-loading">
         {Array.from({ length: 3 }).map((_, index) => (
@@ -69,7 +69,7 @@ export function LeadList({
       >
         <p className="text-sm text-muted-foreground">
           {searchCompleted
-            ? "A busca terminou, mas nenhum negócio foi encontrado no Google Maps para este segmento e região."
+            ? "A busca terminou sem leads salvos. Tente ampliar o raio, mudar o segmento ou relaxar os filtros."
             : "Nenhum lead encontrado ainda. Aguarde o progresso da busca."}
         </p>
       </Card>

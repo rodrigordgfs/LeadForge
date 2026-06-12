@@ -83,27 +83,38 @@ export function KanbanBoard({ leadsByStatus, onStatusChange }: KanbanBoardProps)
             </CardHeader>
 
             <CardContent className="p-2">
-              <ul className="space-y-2">
-                {(leadsByStatus[status] ?? []).map((lead) => (
-                  <Card
-                    key={lead.id}
-                    draggable
-                    onDragStart={() => setDraggedLeadId(lead.id)}
-                    className="cursor-grab gap-2 py-3 shadow-xs active:cursor-grabbing"
-                    data-testid={`kanban-card-${lead.id}`}
-                  >
-                    <CardContent className="px-3 py-0">
-                      <p className="text-sm font-medium text-foreground">
-                        {lead.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{lead.city}</p>
-                      <div className="mt-2">
-                        <ScoreBadge score={lead.score} band={lead.scoreBand} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </ul>
+              {(leadsByStatus[status] ?? []).length === 0 ? (
+                <p
+                  className="px-2 py-6 text-center text-xs text-muted-foreground"
+                  data-testid={`kanban-empty-${status}`}
+                >
+                  Nenhum lead nesta etapa
+                </p>
+              ) : (
+                <ul className="space-y-2">
+                  {(leadsByStatus[status] ?? []).map((lead) => (
+                    <Card
+                      key={lead.id}
+                      draggable
+                      onDragStart={() => setDraggedLeadId(lead.id)}
+                      className="cursor-grab gap-2 py-3 shadow-xs active:cursor-grabbing"
+                      data-testid={`kanban-card-${lead.id}`}
+                    >
+                      <CardContent className="px-3 py-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {lead.name?.trim() || "Lead sem nome"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {lead.city?.trim() || "Cidade não informada"}
+                        </p>
+                        <div className="mt-2">
+                          <ScoreBadge score={lead.score} band={lead.scoreBand} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
         ))}

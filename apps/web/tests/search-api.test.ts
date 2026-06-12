@@ -3,10 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const authMock = vi.fn();
 const searchJobCreateMock = vi.fn();
 const searchJobFindFirstMock = vi.fn();
+const searchJobFindManyMock = vi.fn();
 const leadFindManyMock = vi.fn();
 const leadCountMock = vi.fn();
 const transactionMock = vi.fn();
 const enqueueSearchJobMock = vi.fn();
+const getSearchQueueMock = vi.fn();
+const queueGetJobMock = vi.fn();
+const queueJobRemoveMock = vi.fn();
+const searchJobDeleteMock = vi.fn();
+const markSearchJobCancelledMock = vi.fn();
+const cancelSearchQueueJobMock = vi.fn();
+const cancelAnalyzeJobsForSearchMock = vi.fn();
 
 vi.mock("@clerk/nextjs/server", () => ({
   auth: () => authMock(),
@@ -17,8 +25,9 @@ vi.mock("@leadforge/db", () => ({
     searchJob: {
       create: (...args: unknown[]) => searchJobCreateMock(...args),
       findFirst: (...args: unknown[]) => searchJobFindFirstMock(...args),
+      findMany: (...args: unknown[]) => searchJobFindManyMock(...args),
       findUnique: vi.fn(),
-      delete: vi.fn(),
+      delete: (...args: unknown[]) => searchJobDeleteMock(...args),
     },
     lead: {
       findMany: (...args: unknown[]) => leadFindManyMock(...args),
@@ -35,14 +44,24 @@ vi.mock("@leadforge/db", () => ({
 
 vi.mock("@leadforge/queue", () => ({
   enqueueSearchJob: (...args: unknown[]) => enqueueSearchJobMock(...args),
-  getSearchQueue: vi.fn(),
+  getSearchQueue: (...args: unknown[]) => getSearchQueueMock(...args),
+  markSearchJobCancelled: (...args: unknown[]) =>
+    markSearchJobCancelledMock(...args),
+  cancelSearchQueueJob: (...args: unknown[]) =>
+    cancelSearchQueueJobMock(...args),
+  cancelAnalyzeJobsForSearch: (...args: unknown[]) =>
+    cancelAnalyzeJobsForSearchMock(...args),
   closeSearchQueue: vi.fn(),
   resetRedisConnection: vi.fn(),
 }));
 
-import { GET as getSearchById } from "@/app/api/searches/[id]/route";
-import { POST as createSearchRoute } from "@/app/api/searches/route";
+import {
+  DELETE as deleteSearchById,
+  GET as getSearchById,
+} from "@/app/api/searches/[id]/route";
+import { GET as listSearchesRoute, POST as createSearchRoute } from "@/app/api/searches/route";
 import { createSearchJob } from "@/lib/search/create-search-job";
+import { deleteSearchJobForUser } from "@/lib/search/delete-search-job";
 import { getSearchJobForUser } from "@/lib/search/get-search-job";
 import { listSearchLeads } from "@/lib/search/list-search-leads";
 import { validateSegmentInput } from "@/lib/search/validate-segment";
@@ -187,6 +206,7 @@ describe("listSearchLeads", () => {
     expect(result?.total).toBe(3);
     expect(leadFindManyMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        select: expect.objectContaining({ id: true, name: true }),
         orderBy: { score: { sort: "asc", nulls: "last" } },
       }),
     );
@@ -217,6 +237,86 @@ describe("POST /api/searches route", () => {
   });
 });
 
+describe("GET /api/searches route", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns recent searches for the authenticated user", async () => {
+    authMock.mockResolvedValue({ userId: "user_1" });
+    searchJobFindManyMock.mockResolvedValue([
+      {
+        id: "job_1",
+        segmentId: "saude",
+        subcategoryId: null,
+        city: "Pelotas",
+        state: "RS",
+        radiusKm: 10,
+        status: "completed",
+        progressPct: 100,
+        totalFound: 5,
+        errorMessage: null,
+        createdAt: new Date("2026-06-11T12:00:00.000Z"),
+        completedAt: new Date("2026-06-11T12:30:00.000Z"),
+        _count: { leads: 5 },
+      },
+    ]);
+
+    const response = await listSearchesRoute();
+    const data = (await response.json()) as {
+      searches: Array<{ id: string; segmentName: string; leadCount: number }>;
+    };
+
+    expect(response.status).toBe(200);
+    expect(data.searches).toHaveLength(1);
+    expect(data.searches[0]?.id).toBe("job_1");
+    expect(data.searches[0]?.segmentName).toBe("Saúde");
+    expect(data.searches[0]?.leadCount).toBe(5);
+    expect(searchJobFindManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: "user_1" },
+        orderBy: { createdAt: "desc" },
+      }),
+    );
+  });
+});
+
+describe("deleteSearchJobForUser", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    markSearchJobCancelledMock.mockResolvedValue(undefined);
+    cancelSearchQueueJobMock.mockResolvedValue(undefined);
+    cancelAnalyzeJobsForSearchMock.mockResolvedValue(undefined);
+    searchJobDeleteMock.mockResolvedValue({});
+  });
+
+  it("cancels in-flight work and deletes search when owned by user", async () => {
+    searchJobFindFirstMock.mockResolvedValue({
+      id: "job_1",
+      status: "running",
+    });
+
+    const deleted = await deleteSearchJobForUser("user_1", "job_1");
+
+    expect(deleted).toBe(true);
+    expect(markSearchJobCancelledMock).toHaveBeenCalledWith("job_1");
+    expect(cancelSearchQueueJobMock).toHaveBeenCalledWith("job_1");
+    expect(cancelAnalyzeJobsForSearchMock).toHaveBeenCalledWith("job_1");
+    expect(searchJobDeleteMock).toHaveBeenCalledWith({
+      where: { id: "job_1" },
+    });
+  });
+
+  it("returns false when search does not belong to user", async () => {
+    searchJobFindFirstMock.mockResolvedValue(null);
+
+    const deleted = await deleteSearchJobForUser("user_2", "job_1");
+
+    expect(deleted).toBe(false);
+    expect(searchJobDeleteMock).not.toHaveBeenCalled();
+  });
+});
+
 describe("GET /api/searches/:id route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -232,6 +332,25 @@ describe("GET /api/searches/:id route", () => {
     );
 
     expect(response.status).toBe(404);
+  });
+
+  it("DELETE returns 204 when search is deleted", async () => {
+    authMock.mockResolvedValue({ userId: "user_1" });
+    searchJobFindFirstMock.mockResolvedValue({
+      id: "job_1",
+      status: "running",
+    });
+    markSearchJobCancelledMock.mockResolvedValue(undefined);
+    cancelSearchQueueJobMock.mockResolvedValue(undefined);
+    cancelAnalyzeJobsForSearchMock.mockResolvedValue(undefined);
+    searchJobDeleteMock.mockResolvedValue({});
+
+    const response = await deleteSearchById(
+      new Request("http://localhost/api/searches/job_1", { method: "DELETE" }),
+      { params: Promise.resolve({ id: "job_1" }) },
+    );
+
+    expect(response.status).toBe(204);
   });
 });
 

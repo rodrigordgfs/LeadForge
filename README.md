@@ -15,6 +15,7 @@ O LeadForge automatiza a descoberta de negócios locais via Google Maps, avalia 
 - [Início rápido](#início-rápido)
 - [Configuração detalhada](#configuração-detalhada)
 - [Executando em desenvolvimento](#executando-em-desenvolvimento)
+- [Playwright / Chromium](#playwright--chromium)
 - [Docker](#docker)
 - [Estrutura do monorepo](#estrutura-do-monorepo)
 - [Scripts disponíveis](#scripts-disponíveis)
@@ -146,23 +147,26 @@ flowchart TB
 # 1. Instalar dependências
 pnpm install
 
-# 2. Configurar ambiente
+# 2. Instalar Chromium e dependências do sistema (worker local no host)
+pnpm --filter @leadforge/worker setup:playwright
+
+# 3. Configurar ambiente
 cp .env.example .env
 # Edite .env com as chaves do Clerk (obrigatório)
 
-# 3. Subir infraestrutura
+# 4. Subir infraestrutura
 pnpm docker:up
 
-# 4. Aplicar migrations
+# 5. Aplicar migrations
 pnpm db:migrate
 
-# 5. Build dos pacotes
+# 6. Build dos pacotes
 pnpm build
 
-# 6. Terminal 1 — aplicação web
+# 7. Terminal 1 — aplicação web
 pnpm --filter @leadforge/web dev
 
-# 7. Terminal 2 — workers BullMQ
+# 8. Terminal 2 — workers BullMQ (host)
 pnpm --filter @leadforge/worker start
 ```
 
@@ -191,6 +195,8 @@ cp .env.example .env
 | `HIGH_OPPORTUNITY_THRESHOLD` | Não | Limiar score para auto-pipeline (padrão: `60`) |
 | `SCRAPER_MAX_RESULTS` | Não | Máximo de resultados por busca (padrão: `120`) |
 | `SCRAPER_CONCURRENCY` | Não | Contextos Playwright simultâneos (padrão: `2`) |
+
+> **Playwright:** em dev local no host, o Chromium é instalado em `~/.cache/ms-playwright/`. No Docker, o compose define `PLAYWRIGHT_BROWSERS_PATH=0` (browsers dentro de `node_modules` no container). Veja [Playwright / Chromium](#playwright--chromium).
 
 ### Clerk
 
@@ -242,6 +248,63 @@ pnpm --filter @leadforge/worker start
 
 > **Importante:** `pnpm dev` na raiz inicia apenas o watch TypeScript dos pacotes e o Next.js — **não** executa os workers BullMQ. Use `worker start` em um terminal separado.
 
+> **Não rode dois workers ao mesmo tempo.** Escolha worker no **host** (`pnpm --filter @leadforge/worker start`) **ou** worker no **Docker** (`docker compose up -d worker`), nunca os dois — ambos consomem a mesma fila Redis.
+
+---
+
+## Playwright / Chromium
+
+O scraper de Google Maps e a auditoria de sites dependem do **Chromium** via Playwright. Essa configuração é **obrigatória** se você roda o worker no host (WSL/Linux/macOS). Se usar apenas o container Docker, a imagem já inclui browsers e bibliotecas de sistema.
+
+### Dev local (worker no host)
+
+Após `pnpm install`, execute **uma vez** (ou após atualizar a versão do Playwright):
+
+```bash
+pnpm --filter @leadforge/worker setup:playwright
+```
+
+O script `apps/worker/scripts/setup-playwright.sh`:
+
+1. Baixa o Chromium para `~/.cache/ms-playwright/`
+2. Instala dependências de sistema (NSS, fonts, etc.) via `playwright install-deps`
+3. Corrige permissões do cache se o passo anterior rodou com `sudo`
+
+**WSL / Linux — `sudo: pnpm: command not found`:** o `sudo` não enxerga o `pnpm` do asdf/nvm. Use o script acima (ele chama o CLI do Playwright com `sudo env "PATH=$PATH" node …`) ou rode manualmente:
+
+```bash
+cd apps/worker
+pnpm exec playwright install chromium
+sudo env "PATH=$PATH" node node_modules/playwright/cli.js install-deps chromium
+sudo chown -R "$(id -un):$(id -gn)" ~/.cache/ms-playwright
+```
+
+**Somente o browser (sem deps de sistema):**
+
+```bash
+cd apps/worker
+pnpm exec playwright install chromium
+```
+
+### Worker no Docker
+
+O worker containerizado não precisa de `setup:playwright` no host. A imagem baseia-se em `mcr.microsoft.com/playwright:v1.60.0-jammy` e o compose define `PLAYWRIGHT_BROWSERS_PATH=0` para usar os browsers instalados em `node_modules` durante o build.
+
+```bash
+docker compose up -d --build worker
+docker compose logs -f worker
+```
+
+Reconstrua a imagem após alterar `apps/worker/Dockerfile` ou a versão do pacote `playwright`.
+
+### Busca falhou com erro de Chromium
+
+1. Confirme que o worker certo está ativo (host **ou** Docker, não ambos)
+2. No host: rode `pnpm --filter @leadforge/worker setup:playwright`
+3. Na UI de resultados, use **Tentar novamente** (reenfileira via `POST /api/searches/:id/retry`) ou crie uma **nova busca** em `/busca` — jobs antigos ficam com `status: failed` e a mensagem de erro no banco
+
+---
+
 ### Health check
 
 ```bash
@@ -279,7 +342,7 @@ docker compose ps
 
 O container `worker` usa URLs internas do Docker (`postgres:5432`, `redis:6379`). A aplicação web rodando no host continua usando `localhost:5434` e `localhost:6379` via `.env`.
 
-A imagem do worker baseia-se em `mcr.microsoft.com/playwright:v1.49.0-jammy`.
+Detalhes do Chromium no container: [Playwright / Chromium](#playwright--chromium).
 
 ---
 
@@ -333,6 +396,7 @@ Por pacote:
 ```bash
 pnpm --filter @leadforge/web dev
 pnpm --filter @leadforge/web build
+pnpm --filter @leadforge/worker setup:playwright   # Chromium + deps (worker local, uma vez)
 pnpm --filter @leadforge/worker test
 pnpm --filter @leadforge/db db:migrate
 ```
@@ -467,10 +531,19 @@ O scraper e OpenAI usam **fixtures/mocks** no CI — não dependem de Google Map
 
 ### Playwright / Chromium não encontrado
 
+Siga a seção [Playwright / Chromium](#playwright--chromium). Resumo:
+
 ```bash
-cd apps/worker
-PLAYWRIGHT_BROWSERS_PATH=0 pnpm exec playwright install chromium
+pnpm --filter @leadforge/worker setup:playwright
 ```
+
+Se o erro persistir:
+
+- Verifique se o binário existe: `ls ~/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell`
+- Corrija permissões: `sudo chown -R "$(id -un):$(id -gn)" ~/.cache/ms-playwright`
+- Não use `sudo pnpm` — use `sudo env "PATH=$PATH" node node_modules/playwright/cli.js install-deps chromium` a partir de `apps/worker`
+- Pare o worker Docker se estiver rodando o worker local (ou vice-versa)
+- Reprocesse a busca com **Tentar novamente** ou crie uma nova em `/busca`
 
 ### Artefatos não são gerados
 

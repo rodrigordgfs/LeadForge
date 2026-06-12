@@ -57,6 +57,9 @@ function derivePhaseFromJob(status: string, progressPct: number): string {
   if (progressPct >= 80) {
     return "analyzing";
   }
+  if (progressPct > 20 && progressPct <= 25) {
+    return "enriching";
+  }
   if (progressPct > 0) {
     return "scraping";
   }
@@ -99,11 +102,16 @@ function stateFromSearchJob(job: {
 function derivePhase(event: SseEvent): string {
   switch (event.type) {
     case "progress":
-      return event.payload.progressPct < 30
-        ? "running"
-        : event.payload.progressPct < 80
-          ? "scraping"
-          : "analyzing";
+      if (event.payload.progressPct <= 5) {
+        return "running";
+      }
+      if (event.payload.progressPct >= 80) {
+        return "analyzing";
+      }
+      if (event.payload.progressPct > 20 && event.payload.progressPct <= 25) {
+        return "enriching";
+      }
+      return "scraping";
     case "lead_scraped":
       return "scraping";
     case "lead_analyzed":

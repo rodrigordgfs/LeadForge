@@ -121,11 +121,18 @@ export interface WorkerHandles {
 
 export function createWorkers(): WorkerHandles {
   const connection = getRedisConnectionOptions();
-  const scraper = new PlaywrightMapsScraper();
 
   const searchWorker = new Worker(
     QUEUE_NAMES.search,
-    createSearchProcessorHandler({ scraper }),
+    createSearchProcessorHandler({
+      scraper: new PlaywrightMapsScraper(),
+      createScraper: (hooks) =>
+        new PlaywrightMapsScraper({
+          onScrapeProgress: hooks.onScrapeProgress,
+          onEnrichProgress: hooks.onEnrichProgress,
+          shouldAbort: hooks.shouldAbort,
+        }),
+    }),
     { connection },
   );
 

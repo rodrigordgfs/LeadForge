@@ -1,4 +1,4 @@
-import type { LeadStatus } from "@leadforge/db";
+import type { LeadStatus, SearchJobStatus } from "@leadforge/db";
 import type { ScoreBandLabel } from "@leadforge/shared";
 
 export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
@@ -37,10 +37,18 @@ export const SCORE_BAND_COLORS: Record<ScoreBandLabel, ScoreBandBadgeVariant> = 
   excellent: "excellent",
 };
 
+export const SEARCH_JOB_STATUS_LABELS: Record<SearchJobStatus, string> = {
+  pending: "Aguardando",
+  running: "Em andamento",
+  completed: "Concluída",
+  failed: "Falhou",
+};
+
 export const JOB_PHASE_LABELS: Record<string, string> = {
   pending: "Aguardando início",
   running: "Buscando negócios",
   scraping: "Coletando resultados",
+  enriching: "Enriquecendo dados",
   analyzing: "Analisando sites",
   completed: "Concluído",
   failed: "Falhou",

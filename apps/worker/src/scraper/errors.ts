@@ -5,6 +5,13 @@ export class CaptchaDetectedError extends Error {
   }
 }
 
+export class SearchCancelledError extends Error {
+  constructor(message = "Search cancelled") {
+    super(message);
+    this.name = "SearchCancelledError";
+  }
+}
+
 export class BrowserPoolExhaustedError extends Error {
   constructor(maxConcurrency: number) {
     super(

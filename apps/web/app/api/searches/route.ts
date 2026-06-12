@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 
 import { isAuthError, requireApiUserId } from "@/lib/api/auth";
 import { createSearchJob } from "@/lib/search/create-search-job";
+import { listUserSearches } from "@/lib/search/list-user-searches";
+
+export async function GET() {
+  const authResult = await requireApiUserId();
+  if (isAuthError(authResult)) {
+    return authResult;
+  }
+
+  const searches = await listUserSearches(authResult.userId);
+  return NextResponse.json({ searches });
+}
 
 export async function POST(request: Request) {
   const authResult = await requireApiUserId();

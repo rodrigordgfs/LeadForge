@@ -34,6 +34,10 @@ function getStatusHint(state: JobEventsState): string | null {
     return "Abrindo Google Maps e aguardando a lista de resultados (pode levar 1–3 min).";
   }
 
+  if (state.phase === "enriching") {
+    return "Coletando telefone e site de cada negócio — pode levar vários minutos.";
+  }
+
   if (state.phase === "scraping" || (state.phase === "running" && state.totalFound > 0)) {
     return "Coletando negócios no Maps — o worker está ativo.";
   }
@@ -112,7 +116,9 @@ export function JobProgress({ state, onRetry }: JobProgressProps) {
           {state.totalFound > 0 ? (
             <span className="font-mono">
               {state.totalFound}{" "}
-              {state.phase === "scraping" || state.progressPct <= 25
+              {state.phase === "scraping" ||
+              state.phase === "enriching" ||
+              state.progressPct <= 25
                 ? "encontrados no Maps"
                 : "leads encontrados"}
             </span>
@@ -142,7 +148,12 @@ export function JobProgress({ state, onRetry }: JobProgressProps) {
         ) : null}
 
         {state.status === "completed" ? (
-          <p className="text-sm text-success">Busca concluída!</p>
+          <p className="text-sm text-success">
+            Busca concluída!
+            {state.totalFound > 0
+              ? ` ${state.totalFound} lead${state.totalFound === 1 ? "" : "s"} salvos.`
+              : " Nenhum lead foi salvo para esta busca."}
+          </p>
         ) : null}
       </CardContent>
     </Card>

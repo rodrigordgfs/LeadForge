@@ -5,11 +5,29 @@ import type {
   ScrapeSearchInput,
   ScrapedBusiness,
 } from "@leadforge/shared";
-import type { Locator, Page } from "playwright";
+import type { Page } from "playwright";
+import {
+  extractCard,
+  readDetailPhone,
+  readDetailWebsite,
+} from "./card-extract.js";
 import { BrowserPool } from "./browser-pool.js";
-import { CaptchaDetectedError } from "./errors.js";
+import { CaptchaDetectedError, SearchCancelledError } from "./errors.js";
 import { applyPostFilters } from "./post-filters.js";
 import { SELECTORS } from "./selector-map.js";
+
+export {
+  extractCard,
+  readDetailPhone,
+  readDetailWebsite,
+} from "./card-extract.js";
+
+export type ScrapeProgressCallback = (found: number) => void | Promise<void>;
+export type EnrichProgressCallback = (
+  enriched: number,
+  total: number,
+) => void | Promise<void>;
+export type ShouldAbortCallback = () => boolean | Promise<boolean>;
 
 export interface PlaywrightMapsScraperOptions {
   maxResults?: number;
@@ -19,28 +37,21 @@ export interface PlaywrightMapsScraperOptions {
   browserPool?: BrowserPool;
   delayMs?: () => number;
   ownsBrowserPool?: boolean;
+  onScrapeProgress?: ScrapeProgressCallback;
+  onEnrichProgress?: EnrichProgressCallback;
+  shouldAbort?: ShouldAbortCallback;
+}
+
+async function throwIfAborted(
+  shouldAbort?: ShouldAbortCallback,
+): Promise<void> {
+  if (shouldAbort && (await shouldAbort())) {
+    throw new SearchCancelledError();
+  }
 }
 
 function defaultDelayMs(): number {
   return Math.floor(Math.random() * 2000) + 1000;
-}
-
-function parseOptionalNumber(value: string | null | undefined): number | undefined {
-  if (!value?.trim()) {
-    return undefined;
-  }
-
-  const parsed = Number.parseFloat(value);
-  return Number.isNaN(parsed) ? undefined : parsed;
-}
-
-function parseOptionalInt(value: string | null | undefined): number | undefined {
-  if (!value?.trim()) {
-    return undefined;
-  }
-
-  const parsed = Number.parseInt(value, 10);
-  return Number.isNaN(parsed) ? undefined : parsed;
 }
 
 export async function detectCaptcha(page: Page): Promise<boolean> {
@@ -53,64 +64,67 @@ export async function assertNoCaptcha(page: Page): Promise<void> {
   }
 }
 
-export async function extractCard(card: Locator): Promise<ScrapedBusiness | null> {
-  const name = (await card.locator(SELECTORS.businessName).textContent())?.trim();
-  const mapsUrl =
-    (await card.locator(SELECTORS.mapsLink).getAttribute("href")) ??
-    (await card.getAttribute("data-maps-url"));
+async function dismissCookieConsent(page: Page): Promise<void> {
+  const consentButtons = [
+    'button:has-text("Aceitar tudo")',
+    'button:has-text("Accept all")',
+    'button:has-text("Recusar tudo")',
+    'button:has-text("Reject all")',
+  ];
 
-  if (!name || !mapsUrl) {
-    return null;
+  for (const selector of consentButtons) {
+    const button = page.locator(selector).first();
+    try {
+      if (await button.isVisible({ timeout: 2_000 })) {
+        await button.click({ timeout: 2_000 });
+        await page.waitForTimeout(500);
+        return;
+      }
+    } catch {
+      // Try next consent button variant.
+    }
   }
+}
 
-  const category =
-    (await card.locator(SELECTORS.category).textContent())?.trim() ?? "";
-  const address =
-    (await card.locator(SELECTORS.address).textContent())?.trim() ?? "";
-  const city = (await card.locator(SELECTORS.city).textContent())?.trim() ?? "";
-  const state =
-    (await card.locator(SELECTORS.state).textContent())?.trim() ?? "";
-  const phone =
-    (await card.locator(SELECTORS.phone).textContent())?.trim() || undefined;
-  const websiteRaw =
-    (await card.locator(SELECTORS.website).getAttribute("href")) ?? undefined;
-  const website =
-    websiteRaw && websiteRaw !== "#" ? websiteRaw : undefined;
-  const rating = parseOptionalNumber(
-    await card.locator(SELECTORS.rating).textContent(),
-  );
-  const reviewCount = parseOptionalInt(
-    await card.locator(SELECTORS.reviewCount).textContent(),
-  );
+async function waitForResultCards(page: Page): Promise<void> {
+  const readyLocator = page
+    .locator(SELECTORS.resultCard)
+    .locator(`${SELECTORS.placeLink}, ${SELECTORS.businessName}`)
+    .first();
 
-  return {
-    name,
-    category,
-    address,
-    city,
-    state,
-    phone,
-    website,
-    rating,
-    reviewCount,
-    mapsUrl,
-  };
+  await page.locator(SELECTORS.resultsFeed).waitFor({
+    state: "attached",
+    timeout: 45_000,
+  });
+  await readyLocator.waitFor({ state: "attached", timeout: 45_000 });
 }
 
 export async function scrollAndExtract(
   page: Page,
   maxResults: number,
   delayMs: () => number = defaultDelayMs,
+  onScrapeProgress?: ScrapeProgressCallback,
+  shouldAbort?: ShouldAbortCallback,
 ): Promise<ScrapedBusiness[]> {
-  const feed = page.locator(SELECTORS.resultsFeed);
-  await feed.waitFor({ state: "attached" });
+  await waitForResultCards(page);
+  await onScrapeProgress?.(0);
 
+  const feed = page.locator(SELECTORS.resultsFeed);
   const seenUrls = new Set<string>();
   const results: ScrapedBusiness[] = [];
   let previousCardCount = 0;
   let staleScrolls = 0;
+  let lastReported = -1;
+
+  const reportProgress = async () => {
+    if (results.length !== lastReported) {
+      lastReported = results.length;
+      await onScrapeProgress?.(results.length);
+    }
+  };
 
   while (results.length < maxResults && staleScrolls < 3) {
+    await throwIfAborted(shouldAbort);
     const cards = page.locator(SELECTORS.resultCard);
     const cardCount = await cards.count();
 
@@ -119,6 +133,7 @@ export async function scrollAndExtract(
       if (business && !seenUrls.has(business.mapsUrl)) {
         seenUrls.add(business.mapsUrl);
         results.push(business);
+        await reportProgress();
       }
     }
 
@@ -142,48 +157,80 @@ export async function scrollAndExtract(
   return results.slice(0, maxResults);
 }
 
-export async function enrichFromDetailPanels(
+async function buildResultCardIndex(
   page: Page,
-  businesses: ScrapedBusiness[],
-): Promise<ScrapedBusiness[]> {
-  const enriched: ScrapedBusiness[] = [];
+): Promise<Map<string, ReturnType<Page["locator"]>>> {
+  const cards = page.locator(SELECTORS.resultCard);
+  const cardCount = await cards.count();
+  const indexByKey = new Map<string, ReturnType<Page["locator"]>>();
 
-  for (const business of businesses) {
-    if (business.phone && business.website) {
-      enriched.push(business);
+  for (let index = 0; index < cardCount; index += 1) {
+    const card = cards.nth(index);
+    const summary = await extractCard(card);
+    if (!summary) {
       continue;
     }
 
-    const card = page
-      .locator(SELECTORS.resultCard)
-      .filter({
-        has: page.locator(`${SELECTORS.mapsLink}[href="${business.mapsUrl}"]`),
-      })
-      .first();
+    indexByKey.set(summary.mapsUrl, card);
+    indexByKey.set(summary.name, card);
+  }
 
-    if ((await card.count()) === 0) {
+  return indexByKey;
+}
+
+export async function enrichFromDetailPanels(
+  page: Page,
+  businesses: ScrapedBusiness[],
+  onEnrichProgress?: EnrichProgressCallback,
+  shouldAbort?: ShouldAbortCallback,
+): Promise<ScrapedBusiness[]> {
+  const cardIndex = await buildResultCardIndex(page);
+  const enriched: ScrapedBusiness[] = [];
+  const total = businesses.length;
+
+  for (let index = 0; index < businesses.length; index += 1) {
+    await throwIfAborted(shouldAbort);
+    const business = businesses[index]!;
+
+    if (business.phone && business.website) {
       enriched.push(business);
+      await onEnrichProgress?.(index + 1, total);
+      continue;
+    }
+
+    const card =
+      cardIndex.get(business.mapsUrl) ?? cardIndex.get(business.name);
+
+    if (!card || (await card.count()) === 0) {
+      enriched.push(business);
+      await onEnrichProgress?.(index + 1, total);
       continue;
     }
 
     await card.click();
-    await page.locator(SELECTORS.detailPanel).waitFor({ state: "visible" });
 
-    const phone =
-      business.phone ??
-      (await page.locator(SELECTORS.detailPhone).textContent())?.trim();
-    const websiteRaw =
-      business.website ??
-      (await page.locator(SELECTORS.detailWebsite).getAttribute("href")) ??
-      undefined;
-    const website =
-      websiteRaw && websiteRaw !== "#" ? websiteRaw : undefined;
+    try {
+      await page
+        .locator(
+          `${SELECTORS.detailPanel}, ${SELECTORS.liveDetailPhone}, ${SELECTORS.detailPhone}`,
+        )
+        .first()
+        .waitFor({ state: "attached", timeout: 5_000 });
+    } catch {
+      enriched.push(business);
+      await onEnrichProgress?.(index + 1, total);
+      continue;
+    }
+
+    const phone = business.phone ?? (await readDetailPhone(page));
+    const website = business.website ?? (await readDetailWebsite(page));
 
     enriched.push({
       ...business,
       phone: phone || undefined,
       website,
     });
+    await onEnrichProgress?.(index + 1, total);
   }
 
   return enriched;
@@ -196,6 +243,9 @@ export class PlaywrightMapsScraper implements MapsScraper {
   private readonly ownsBrowserPool: boolean;
   private readonly fixturePath?: string;
   private readonly fixtureHtml?: string;
+  private readonly onScrapeProgress?: ScrapeProgressCallback;
+  private readonly onEnrichProgress?: EnrichProgressCallback;
+  private readonly shouldAbort?: ShouldAbortCallback;
 
   constructor(options: PlaywrightMapsScraperOptions = {}) {
     this.maxResults =
@@ -204,6 +254,9 @@ export class PlaywrightMapsScraper implements MapsScraper {
     this.delayMs = options.delayMs ?? defaultDelayMs;
     this.fixturePath = options.fixturePath;
     this.fixtureHtml = options.fixtureHtml;
+    this.onScrapeProgress = options.onScrapeProgress;
+    this.onEnrichProgress = options.onEnrichProgress;
+    this.shouldAbort = options.shouldAbort;
     this.ownsBrowserPool = options.ownsBrowserPool ?? !options.browserPool;
     this.browserPool =
       options.browserPool ??
@@ -221,11 +274,26 @@ export class PlaywrightMapsScraper implements MapsScraper {
     const context = await this.browserPool.acquireContext();
     try {
       const page = await context.newPage();
+      await page.setViewportSize({ width: 1280, height: 900 });
       await this.loadPage(page, input);
       await assertNoCaptcha(page);
 
-      const extracted = await scrollAndExtract(page, this.maxResults, this.delayMs);
-      const enriched = await enrichFromDetailPanels(page, extracted);
+      const extracted = await scrollAndExtract(
+        page,
+        this.maxResults,
+        this.delayMs,
+        this.onScrapeProgress,
+        this.shouldAbort,
+      );
+      console.log(
+        `[search] Maps scroll finished found=${extracted.length}, enriching details…`,
+      );
+      const enriched = await enrichFromDetailPanels(
+        page,
+        extracted,
+        this.onEnrichProgress,
+        this.shouldAbort,
+      );
       return applyPostFilters(enriched, input.filters);
     } finally {
       await this.browserPool.releaseContext(context);
@@ -260,6 +328,8 @@ export class PlaywrightMapsScraper implements MapsScraper {
       state: input.state,
     });
     const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
-    await page.goto(url, { waitUntil: "domcontentloaded" });
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await dismissCookieConsent(page);
+    await page.waitForTimeout(1_500);
   }
 }

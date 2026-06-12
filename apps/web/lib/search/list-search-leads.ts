@@ -1,4 +1,20 @@
-import { prisma, type Lead } from "@leadforge/db";
+import type { LeadStatus, ScoreBand } from "@leadforge/db";
+import { prisma } from "@leadforge/db";
+
+export interface SearchLeadListItem {
+  id: string;
+  name: string;
+  category: string;
+  city: string;
+  state: string;
+  phone: string | null;
+  whatsapp: string | null;
+  score: number | null;
+  scoreBand: ScoreBand | null;
+  hasRealWebsite: boolean;
+  autoPipelineTriggered: boolean;
+  status: LeadStatus;
+}
 
 export interface ListSearchLeadsInput {
   userId: string;
@@ -8,9 +24,24 @@ export interface ListSearchLeadsInput {
 }
 
 export interface ListSearchLeadsResult {
-  leads: Lead[];
+  leads: SearchLeadListItem[];
   total: number;
 }
+
+const leadListSelect = {
+  id: true,
+  name: true,
+  category: true,
+  city: true,
+  state: true,
+  phone: true,
+  whatsapp: true,
+  score: true,
+  scoreBand: true,
+  hasRealWebsite: true,
+  autoPipelineTriggered: true,
+  status: true,
+} as const;
 
 export async function listSearchLeads(
   input: ListSearchLeadsInput,
@@ -35,6 +66,7 @@ export async function listSearchLeads(
   const [leads, total] = await prisma.$transaction([
     prisma.lead.findMany({
       where,
+      select: leadListSelect,
       orderBy: { score: { sort: "asc", nulls: "last" } },
       skip: offset,
       take: limit,

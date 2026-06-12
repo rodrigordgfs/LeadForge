@@ -8,6 +8,19 @@ export type {
 export { cn } from "./lib/utils.js";
 
 export { Alert, AlertTitle, AlertDescription } from "./components/alert.js";
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./components/alert-dialog.js";
 export { Badge, badgeVariants } from "./components/badge.js";
 export { Button, buttonVariants } from "./components/button.js";
 export {

@@ -4,6 +4,8 @@ import type { ScrapedBusiness } from "@leadforge/shared";
 const searchJobUpdateMock = vi.fn();
 const publishSseEventMock = vi.fn();
 const enqueueAnalyzeJobMock = vi.fn();
+const isSearchJobCancelledMock = vi.fn();
+const searchJobFindUniqueMock = vi.fn();
 const leadFindFirstMock = vi.fn();
 const leadCreateMock = vi.fn();
 
@@ -11,6 +13,7 @@ vi.mock("@leadforge/db", () => ({
   prisma: {
     searchJob: {
       update: (...args: unknown[]) => searchJobUpdateMock(...args),
+      findUnique: (...args: unknown[]) => searchJobFindUniqueMock(...args),
     },
     lead: {
       findFirst: (...args: unknown[]) => leadFindFirstMock(...args),
@@ -36,7 +39,19 @@ vi.mock("@leadforge/shared", async () => {
   };
 });
 
-import { CaptchaDetectedError } from "../src/scraper/errors.js";
+vi.mock("@leadforge/queue", async () => {
+  const actual = await vi.importActual<typeof import("@leadforge/queue")>(
+    "@leadforge/queue",
+  );
+  return {
+    ...actual,
+    isSearchJobCancelled: (...args: unknown[]) =>
+      isSearchJobCancelledMock(...args),
+    enqueueAnalyzeJob: (...args: unknown[]) => enqueueAnalyzeJobMock(...args),
+  };
+});
+
+import { CaptchaDetectedError, SearchCancelledError } from "../src/scraper/errors.js";
 import {
   processSearchJob,
   scrapeWithRetry,
@@ -65,6 +80,8 @@ function buildBusinesses(count: number): ScrapedBusiness[] {
 describe("search processor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    isSearchJobCancelledMock.mockResolvedValue(false);
+    searchJobFindUniqueMock.mockResolvedValue({ id: "job-1" });
     leadFindFirstMock.mockResolvedValue(null);
     leadCreateMock.mockImplementation(async ({ data }: { data: { name: string } }) => ({
       id: `lead-${data.name}`,
@@ -103,10 +120,33 @@ describe("search processor", () => {
       .map((call) => call[0]?.data?.progressPct)
       .filter((value) => value !== undefined);
 
-    expect(progressUpdates).toContain(25);
-    expect(progressUpdates).toContain(50);
-    expect(progressUpdates).toContain(75);
+    expect(progressUpdates).toContain(44);
+    expect(progressUpdates).toContain(63);
+    expect(progressUpdates).toContain(81);
     expect(progressUpdates).toContain(100);
+  });
+
+  it("stops without marking failed when search is cancelled", async () => {
+    const scraper = {
+      scrape: vi.fn().mockRejectedValue(new SearchCancelledError()),
+    };
+
+    await processSearchJob(payload, {
+      scraper,
+      publishEvent: publishSseEventMock,
+      enqueueAnalyze: enqueueAnalyzeJobMock,
+    });
+
+    expect(searchJobUpdateMock).not.toHaveBeenCalledWith({
+      where: { id: "job-1" },
+      data: expect.objectContaining({
+        status: "failed",
+      }),
+    });
+    expect(publishSseEventMock).not.toHaveBeenCalledWith(
+      "job-1",
+      expect.objectContaining({ type: "job_failed" }),
+    );
   });
 
   it("sets SearchJob failed with errorMessage on CaptchaDetectedError", async () => {

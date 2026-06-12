@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -7,7 +8,7 @@ import { cn } from "@leadforge/ui";
 
 export const navItems = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/busca", label: "Busca" },
+  { href: "/buscas", label: "Buscas" },
   { href: "/crm", label: "CRM" },
   { href: "/configuracoes", label: "Configurações" },
 ] as const;
@@ -21,13 +22,42 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <nav
+    <div
       className={cn(
-        "flex flex-col gap-1 p-3",
+        "flex flex-col p-3",
         collapsed ? "items-center" : "items-stretch",
       )}
-      aria-label="Navegação principal"
     >
+      <div
+        className={cn(
+          "flex w-full justify-center px-1 pb-3",
+          collapsed ? "pt-1" : "pt-2",
+        )}
+      >
+        <Image
+          src="/shinoda-labs-logo.png"
+          alt="Shinoda Labs"
+          width={760}
+          height={168}
+          priority
+          className={cn(
+            "h-auto w-full object-contain",
+            collapsed ? "max-w-10" : "max-w-[180px]",
+          )}
+          data-testid="shinoda-labs-logo"
+        />
+      </div>
+
+      <div
+        className="mb-3 border-b border-border"
+        role="separator"
+        aria-hidden="true"
+      />
+
+      <nav
+        className="flex flex-col gap-1"
+        aria-label="Navegação principal"
+      >
       {navItems.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -51,7 +81,8 @@ export function AppSidebar({ collapsed = false, onNavigate }: AppSidebarProps) {
           </Link>
         );
       })}
-    </nav>
+      </nav>
+    </div>
   );
 }
 

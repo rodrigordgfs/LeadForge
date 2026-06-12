@@ -98,4 +98,25 @@ describe("SearchForm", () => {
 
     expect(pushMock).toHaveBeenCalledWith("/busca/job_123");
   });
+
+  it("calls onSuccess instead of navigating when provided", async () => {
+    const onSuccess = vi.fn();
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ searchJobId: "job_456" }), {
+        status: 201,
+      }),
+    );
+
+    render(<SearchForm onSuccess={onSuccess} />);
+
+    fireEvent.change(screen.getByTestId("city-input"), {
+      target: { value: "Pelotas" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Iniciar busca" }));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledWith("job_456");
+    });
+    expect(pushMock).not.toHaveBeenCalled();
+  });
 });

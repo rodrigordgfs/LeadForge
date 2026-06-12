@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { LEAD_STATUS_LABELS } from "@/lib/constants/labels";
+import { formatSearchLeadLabel } from "@/lib/search/search-lead-display";
 
 interface DashboardStats {
   totalLeads: number;
@@ -22,8 +23,10 @@ interface DashboardStats {
     id: string;
     city: string;
     state: string;
+    status: string;
     createdAt: string;
     totalFound: number;
+    leadCount: number;
   }>;
 }
 
@@ -138,7 +141,7 @@ export function DashboardView() {
                     </Link>
                     <p className="font-mono text-xs text-muted-foreground">
                       {new Date(search.createdAt).toLocaleDateString("pt-BR")} ·{" "}
-                      {search.totalFound} leads
+                      {formatSearchLeadLabel(search)}
                     </p>
                   </li>
                 ))}

@@ -28,8 +28,10 @@ export async function getDashboardStats(userId: string) {
         id: true,
         city: true,
         state: true,
+        status: true,
         createdAt: true,
         totalFound: true,
+        _count: { select: { leads: true } },
       },
     }),
   ]);
@@ -65,8 +67,10 @@ export async function getDashboardStats(userId: string) {
       id: search.id,
       city: search.city,
       state: search.state,
+      status: search.status,
       createdAt: search.createdAt.toISOString(),
       totalFound: search.totalFound,
+      leadCount: search._count.leads,
     })),
   };
 }
