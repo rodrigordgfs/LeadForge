@@ -81,8 +81,23 @@ export function SearchResultsView({ searchId }: SearchResultsPageProps) {
       <JobProgress
         state={jobState}
         onRetry={() => {
-          setJobActive(true);
-          jobState.reset();
+          void (async () => {
+            const response = await fetch(`/api/searches/${searchId}/retry`, {
+              method: "POST",
+            });
+
+            if (!response.ok) {
+              const body = (await response.json().catch(() => null)) as {
+                error?: string;
+              } | null;
+              setFetchError(body?.error ?? "Falha ao reiniciar a busca");
+              return;
+            }
+
+            setFetchError(null);
+            setJobActive(true);
+            jobState.reset();
+          })();
         }}
       />
 
