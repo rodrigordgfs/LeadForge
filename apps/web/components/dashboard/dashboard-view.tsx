@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  Alert,
+  AlertDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+} from "@leadforge/ui";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -43,21 +52,30 @@ export function DashboardView() {
 
   if (error) {
     return (
-      <p className="text-sm text-red-600" role="alert">
-        {error}
-      </p>
+      <Alert variant="destructive">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
 
   if (!stats) {
-    return <p className="text-sm text-slate-500">Carregando dashboard…</p>;
+    return (
+      <div className="space-y-4" data-testid="dashboard-loading">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      </div>
+    );
   }
 
   return (
     <section className="space-y-8">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
           Visão geral da prospecção e oportunidades.
         </p>
       </header>
@@ -76,52 +94,58 @@ export function DashboardView() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Leads por status
-          </h2>
-          <ul className="mt-3 space-y-2">
-            {Object.entries(stats.byStatus).map(([status, count]) => (
-              <li
-                key={status}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="text-slate-600">
-                  {LEAD_STATUS_LABELS[status as keyof typeof LEAD_STATUS_LABELS]}
-                </span>
-                <span className="font-medium text-slate-900">{count}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Buscas recentes
-          </h2>
-          {stats.recentSearches.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">
-              Nenhuma busca realizada ainda.
-            </p>
-          ) : (
-            <ul className="mt-3 divide-y divide-slate-100">
-              {stats.recentSearches.map((search) => (
-                <li key={search.id} className="py-2">
-                  <Link
-                    href={`/busca/${search.id}`}
-                    className="text-sm font-medium text-slate-900 hover:underline"
-                  >
-                    {search.city}/{search.state}
-                  </Link>
-                  <p className="text-xs text-slate-500">
-                    {new Date(search.createdAt).toLocaleDateString("pt-BR")} ·{" "}
-                    {search.totalFound} leads
-                  </p>
+        <Card className="gap-4 py-4">
+          <CardHeader className="px-4 py-0">
+            <CardTitle className="text-sm">Leads por status</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            <ul className="space-y-2">
+              {Object.entries(stats.byStatus).map(([status, count]) => (
+                <li
+                  key={status}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="text-muted-foreground">
+                    {LEAD_STATUS_LABELS[status as keyof typeof LEAD_STATUS_LABELS]}
+                  </span>
+                  <span className="font-mono font-medium text-foreground">
+                    {count}
+                  </span>
                 </li>
               ))}
             </ul>
-          )}
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card className="gap-4 py-4">
+          <CardHeader className="px-4 py-0">
+            <CardTitle className="text-sm">Buscas recentes</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            {stats.recentSearches.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma busca realizada ainda.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {stats.recentSearches.map((search) => (
+                  <li key={search.id} className="py-2">
+                    <Link
+                      href={`/busca/${search.id}`}
+                      className="text-sm font-medium text-foreground hover:underline"
+                    >
+                      {search.city}/{search.state}
+                    </Link>
+                    <p className="font-mono text-xs text-muted-foreground">
+                      {new Date(search.createdAt).toLocaleDateString("pt-BR")} ·{" "}
+                      {search.totalFound} leads
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </section>
   );
@@ -137,16 +161,18 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <div
-      className={`rounded-lg border p-4 shadow-sm ${
-        highlight
-          ? "border-emerald-200 bg-emerald-50"
-          : "border-slate-200 bg-white"
-      }`}
+    <Card
+      className={
+        highlight ? "border-success/25 bg-success/5 gap-4 py-4" : "gap-4 py-4"
+      }
       data-testid={`stat-${label}`}
     >
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-slate-900">{value}</p>
-    </div>
+      <CardContent className="px-4">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="mt-2 font-mono text-2xl font-semibold text-foreground">
+          {value}
+        </p>
+      </CardContent>
+    </Card>
   );
 }

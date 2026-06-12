@@ -1,6 +1,20 @@
 "use client";
 
 import type { UserSettings } from "@leadforge/shared";
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Separator,
+  Skeleton,
+  Textarea,
+} from "@leadforge/ui";
 import { useEffect, useState } from "react";
 
 export function SettingsView() {
@@ -81,96 +95,103 @@ export function SettingsView() {
   };
 
   if (!settings && !error) {
-    return <p className="text-sm text-slate-500">Carregando configurações…</p>;
+    return (
+      <div className="space-y-4" data-testid="settings-loading">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-64 w-full max-w-2xl" />
+      </div>
+    );
   }
 
   return (
     <section className="mx-auto max-w-2xl space-y-6">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-900">Configurações</h1>
-        <p className="text-sm text-slate-600">
+        <h1 className="text-2xl font-semibold text-foreground">Configurações</h1>
+        <p className="text-sm text-muted-foreground">
           Ajuste o limiar de alta oportunidade e padrões de proposta.
         </p>
       </header>
 
       <form onSubmit={handleSave} className="space-y-6">
-        <label className="block space-y-2">
-          <span className="text-sm font-medium text-slate-700">
-            Limiar de alta oportunidade: {threshold}
-          </span>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="threshold">
+            Limiar de alta oportunidade:{" "}
+            <span className="font-mono">{threshold}</span>
+          </Label>
+          <Input
+            id="threshold"
             type="range"
             min={0}
             max={100}
             value={threshold}
             onChange={(event) => setThreshold(Number(event.target.value))}
-            className="w-full"
+            className="h-2 cursor-pointer p-0"
             data-testid="threshold-slider"
           />
-          <span className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Leads com score ≤ {threshold} ou sem site são considerados alta
             oportunidade.
-          </span>
-        </label>
+          </p>
+        </div>
 
-        <fieldset className="space-y-3 rounded-lg border border-slate-200 p-4">
-          <legend className="px-1 text-sm font-medium text-slate-700">
-            Padrões de proposta
-          </legend>
+        <Separator />
 
-          <label className="block space-y-1">
-            <span className="text-sm text-slate-700">Escopo padrão</span>
-            <textarea
-              value={scope}
-              onChange={(event) => setScope(event.target.value)}
-              rows={3}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            />
-          </label>
+        <Card className="gap-4 py-4">
+          <CardHeader className="px-4 py-0">
+            <CardTitle className="text-sm">Padrões de proposta</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 px-4">
+            <div className="space-y-2">
+              <Label htmlFor="scope">Escopo padrão</Label>
+              <Textarea
+                id="scope"
+                value={scope}
+                onChange={(event) => setScope(event.target.value)}
+                rows={3}
+              />
+            </div>
 
-          <label className="block space-y-1">
-            <span className="text-sm text-slate-700">Prazo padrão</span>
-            <input
-              type="text"
-              value={deadline}
-              onChange={(event) => setDeadline(event.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              placeholder="Ex.: 30 dias"
-            />
-          </label>
+            <div className="space-y-2">
+              <Label htmlFor="deadline">Prazo padrão</Label>
+              <Input
+                id="deadline"
+                type="text"
+                value={deadline}
+                onChange={(event) => setDeadline(event.target.value)}
+                placeholder="Ex.: 30 dias"
+              />
+            </div>
 
-          <label className="block space-y-1">
-            <span className="text-sm text-slate-700">Mensalidade padrão (R$)</span>
-            <input
-              type="number"
-              min={0}
-              value={monthlyFee}
-              onChange={(event) => setMonthlyFee(event.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            />
-          </label>
-        </fieldset>
+            <div className="space-y-2">
+              <Label htmlFor="monthlyFee">Mensalidade padrão (R$)</Label>
+              <Input
+                id="monthlyFee"
+                type="number"
+                min={0}
+                value={monthlyFee}
+                onChange={(event) => setMonthlyFee(event.target.value)}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {error ? (
-          <p className="text-sm text-red-600" role="alert">
-            {error}
-          </p>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         ) : null}
 
         {message ? (
-          <p className="text-sm text-emerald-700" role="status">
-            {message}
-          </p>
+          <Alert>
+            <AlertDescription className="text-success" role="status">
+              {message}
+            </AlertDescription>
+          </Alert>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-          data-testid="settings-save"
-        >
+        <Button type="submit" disabled={isSaving} data-testid="settings-save">
           {isSaving ? "Salvando…" : "Salvar configurações"}
-        </button>
+        </Button>
       </form>
     </section>
   );
